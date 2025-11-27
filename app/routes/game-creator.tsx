@@ -20,10 +20,14 @@ interface PuzzleData {
   round1: {
     hints: string[];
     puzzleName: string;
+    hintTypes: ("text" | "image" | "audio")[]; // Type of each hint
+    hintFiles: (string | null)[]; // File URLs or data URLs for images/audio
   };
   round2: {
     hints: string[];
     sequenceName: string;
+    hintTypes: ("text" | "image" | "audio")[];
+    hintFiles: (string | null)[];
   };
 }
 
@@ -45,7 +49,49 @@ export default function GameCreator() {
     // Load puzzles from localStorage
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      setPuzzles(JSON.parse(stored));
+      const loaded = JSON.parse(stored);
+      // Migrate old puzzles to include hintTypes and hintFiles
+      const migrated: Record<number, PuzzleData> = {};
+      for (let i = 1; i <= 6; i++) {
+        const puzzle = loaded[i];
+        if (puzzle) {
+          migrated[i] = {
+            tileId: i,
+            round1: {
+              hints: puzzle.round1?.hints || ["", "", "", ""],
+              puzzleName: puzzle.round1?.puzzleName || "",
+              hintTypes: puzzle.round1?.hintTypes || ["text", "text", "text", "text"],
+              hintFiles: puzzle.round1?.hintFiles || [null, null, null, null],
+            },
+            round2: {
+              hints: puzzle.round2?.hints || ["", "", "", ""],
+              sequenceName: puzzle.round2?.sequenceName || "",
+              hintTypes: puzzle.round2?.hintTypes || ["text", "text", "text", "text"],
+              hintFiles: puzzle.round2?.hintFiles || [null, null, null, null],
+            },
+          };
+        } else {
+          // Initialize missing puzzles
+          migrated[i] = {
+            tileId: i,
+            round1: {
+              hints: ["", "", "", ""],
+              puzzleName: "",
+              hintTypes: ["text", "text", "text", "text"],
+              hintFiles: [null, null, null, null],
+            },
+            round2: {
+              hints: ["", "", "", ""],
+              sequenceName: "",
+              hintTypes: ["text", "text", "text", "text"],
+              hintFiles: [null, null, null, null],
+            },
+          };
+        }
+      }
+      setPuzzles(migrated);
+      // Save migrated version back to localStorage
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
     } else {
       // Initialize with empty puzzles for all 6 tiles
       const initial: Record<number, PuzzleData> = {};
@@ -55,10 +101,14 @@ export default function GameCreator() {
           round1: {
             hints: ["", "", "", ""],
             puzzleName: "",
+            hintTypes: ["text", "text", "text", "text"],
+            hintFiles: [null, null, null, null],
           },
           round2: {
             hints: ["", "", "", ""],
             sequenceName: "",
+            hintTypes: ["text", "text", "text", "text"],
+            hintFiles: [null, null, null, null],
           },
         };
       }
@@ -70,8 +120,18 @@ export default function GameCreator() {
     setSelectedTile(tileId);
     setCurrentPuzzle(puzzles[tileId] || {
       tileId,
-      round1: { hints: ["", "", "", ""], puzzleName: "" },
-      round2: { hints: ["", "", "", ""], sequenceName: "" },
+      round1: { 
+        hints: ["", "", "", ""], 
+        puzzleName: "",
+        hintTypes: ["text", "text", "text", "text"],
+        hintFiles: [null, null, null, null],
+      },
+      round2: { 
+        hints: ["", "", "", ""], 
+        sequenceName: "",
+        hintTypes: ["text", "text", "text", "text"],
+        hintFiles: [null, null, null, null],
+      },
     });
   };
 
@@ -101,6 +161,50 @@ export default function GameCreator() {
     setCurrentPuzzle({
       ...currentPuzzle,
       round2: { ...currentPuzzle.round2, hints: newHints },
+    });
+  };
+
+  const handleFileUpload = async (
+    round: 1 | 2,
+    index: number,
+    file: File,
+    type: "image" | "audio"
+  ) => {
+    if (!currentPuzzle) return;
+
+    // Convert file to data URL for storage
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const dataUrl = reader.result as string;
+      const newHintFiles = [...(round === 1 ? currentPuzzle.round1.hintFiles : currentPuzzle.round2.hintFiles)];
+      const newHintTypes = [...(round === 1 ? currentPuzzle.round1.hintTypes : currentPuzzle.round2.hintTypes)];
+      
+      newHintFiles[index] = dataUrl;
+      newHintTypes[index] = type;
+
+      setCurrentPuzzle({
+        ...currentPuzzle,
+        [round === 1 ? "round1" : "round2"]: {
+          ...(round === 1 ? currentPuzzle.round1 : currentPuzzle.round2),
+          hintFiles: newHintFiles,
+          hintTypes: newHintTypes,
+        },
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleHintTypeChange = (round: 1 | 2, index: number, type: "text" | "image" | "audio") => {
+    if (!currentPuzzle) return;
+    const newHintTypes = [...(round === 1 ? currentPuzzle.round1.hintTypes : currentPuzzle.round2.hintTypes)];
+    newHintTypes[index] = type;
+
+    setCurrentPuzzle({
+      ...currentPuzzle,
+      [round === 1 ? "round1" : "round2"]: {
+        ...(round === 1 ? currentPuzzle.round1 : currentPuzzle.round2),
+        hintTypes: newHintTypes,
+      },
     });
   };
 
@@ -152,20 +256,76 @@ export default function GameCreator() {
                 <div className="border-2 border-gray-300 rounded-lg p-4">
                   <h3 className="text-lg font-semibold mb-3">Round 1: Connections</h3>
                   <div className="space-y-3 mb-3">
-                    {currentPuzzle.round1.hints.map((hint, index) => (
-                      <div key={index}>
-                        <label className="block text-sm font-medium mb-1">
-                          Hint {index + 1}
-                        </label>
-                        <input
-                          type="text"
-                          value={hint}
-                          onChange={(e) => handleRound1HintChange(index, e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded"
-                          placeholder={`Enter hint ${index + 1}`}
-                        />
+                    {currentPuzzle.round1.hints.map((hint, index) => {
+                      const hintType = currentPuzzle.round1.hintTypes?.[index] || "text";
+                      const hintFile = currentPuzzle.round1.hintFiles?.[index] || null;
+                      
+                      return (
+                      <div key={index} className="border border-gray-200 rounded p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="block text-sm font-medium">
+                            Hint {index + 1}
+                          </label>
+                          <select
+                            value={hintType}
+                            onChange={(e) => handleHintTypeChange(1, index, e.target.value as "text" | "image" | "audio")}
+                            className="px-2 py-1 text-xs border border-gray-300 rounded"
+                          >
+                            <option value="text">Text</option>
+                            <option value="image">Image</option>
+                            <option value="audio">Audio (MP3)</option>
+                          </select>
+                        </div>
+                        {hintType === "text" ? (
+                          <input
+                            type="text"
+                            value={hint}
+                            onChange={(e) => handleRound1HintChange(index, e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded"
+                            placeholder={`Enter hint ${index + 1}`}
+                          />
+                        ) : currentPuzzle.round1.hintTypes[index] === "image" ? (
+                          <div className="space-y-2">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleFileUpload(1, index, file, "image");
+                              }}
+                              className="w-full text-sm"
+                            />
+                            {hintFile && (
+                              <img
+                                src={hintFile}
+                                alt={`Hint ${index + 1}`}
+                                className="max-w-full h-32 object-contain border border-gray-300 rounded"
+                              />
+                            )}
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <input
+                              type="file"
+                              accept="audio/mpeg,audio/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleFileUpload(1, index, file, "audio");
+                              }}
+                              className="w-full text-sm"
+                            />
+                            {hintFile && (
+                              <audio
+                                src={hintFile}
+                                controls
+                                className="w-full"
+                              />
+                            )}
+                          </div>
+                        )}
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">
@@ -190,20 +350,76 @@ export default function GameCreator() {
                 <div className="border-2 border-gray-300 rounded-lg p-4">
                   <h3 className="text-lg font-semibold mb-3">Round 2: Sequences</h3>
                   <div className="space-y-3 mb-3">
-                    {currentPuzzle.round2.hints.map((hint, index) => (
-                      <div key={index}>
-                        <label className="block text-sm font-medium mb-1">
-                          Hint {index + 1}
-                        </label>
-                        <input
-                          type="text"
-                          value={hint}
-                          onChange={(e) => handleRound2HintChange(index, e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded"
-                          placeholder={`Enter hint ${index + 1}`}
-                        />
+                    {currentPuzzle.round2.hints.map((hint, index) => {
+                      const hintType = currentPuzzle.round2.hintTypes?.[index] || "text";
+                      const hintFile = currentPuzzle.round2.hintFiles?.[index] || null;
+                      
+                      return (
+                      <div key={index} className="border border-gray-200 rounded p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="block text-sm font-medium">
+                            Hint {index + 1}
+                          </label>
+                          <select
+                            value={hintType}
+                            onChange={(e) => handleHintTypeChange(2, index, e.target.value as "text" | "image" | "audio")}
+                            className="px-2 py-1 text-xs border border-gray-300 rounded"
+                          >
+                            <option value="text">Text</option>
+                            <option value="image">Image</option>
+                            <option value="audio">Audio (MP3)</option>
+                          </select>
+                        </div>
+                        {hintType === "text" ? (
+                          <input
+                            type="text"
+                            value={hint}
+                            onChange={(e) => handleRound2HintChange(index, e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded"
+                            placeholder={`Enter hint ${index + 1}`}
+                          />
+                        ) : hintType === "image" ? (
+                          <div className="space-y-2">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleFileUpload(2, index, file, "image");
+                              }}
+                              className="w-full text-sm"
+                            />
+                            {hintFile && (
+                              <img
+                                src={hintFile}
+                                alt={`Hint ${index + 1}`}
+                                className="max-w-full h-32 object-contain border border-gray-300 rounded"
+                              />
+                            )}
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <input
+                              type="file"
+                              accept="audio/mpeg,audio/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleFileUpload(2, index, file, "audio");
+                              }}
+                              className="w-full text-sm"
+                            />
+                            {hintFile && (
+                              <audio
+                                src={hintFile}
+                                controls
+                                className="w-full"
+                              />
+                            )}
+                          </div>
+                        )}
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">

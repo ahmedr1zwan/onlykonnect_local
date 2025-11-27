@@ -6,6 +6,8 @@ interface TileRevealProps {
   round: 1 | 2;
   onClose: () => void;
   hints?: string[];
+  hintTypes?: ("text" | "image" | "audio")[];
+  hintFiles?: (string | null)[];
   puzzleName?: string;
   sequenceName?: string;
   revealedHints?: number; // Track how many hints have been revealed
@@ -28,6 +30,8 @@ export function TileReveal({
   round, 
   onClose, 
   hints = [],
+  hintTypes = [],
+  hintFiles = [],
   puzzleName,
   sequenceName,
   revealedHints = 0
@@ -37,8 +41,10 @@ export function TileReveal({
   const [isTimerActive, setIsTimerActive] = useState(true);
   const [stealTime, setStealTime] = useState(15);
   const [showStealControls, setShowStealControls] = useState(false);
+  const [isAnswerRevealed, setIsAnswerRevealed] = useState(false);
+  // Both rounds start with first hint revealed, host clicks to reveal more
   const [revealedHintIndices, setRevealedHintIndices] = useState<Set<number>>(
-    new Set(round === 2 ? [0] : []) // Round 2 starts with first hint revealed
+    new Set([0]) // Both rounds start with first hint revealed
   );
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const tile = tileMap[tileId];
@@ -49,8 +55,9 @@ export function TileReveal({
     setIsTimerActive(true);
     setTime(40);
     setShowStealControls(false);
-    // Reset revealed hints - Round 2 starts with first hint revealed
-    setRevealedHintIndices(new Set(round === 2 ? [0] : []));
+    setIsAnswerRevealed(false);
+    // Reset revealed hints - both rounds start with first hint revealed
+    setRevealedHintIndices(new Set([0]));
   }, [tileId, round]);
 
   useEffect(() => {
@@ -132,19 +139,36 @@ export function TileReveal({
   ];
   const allHints = hints.length > 0 ? hints : defaultHints;
 
-  // Round 2: Only show 3 hints (hide the 4th)
-  const displayHints = round === 2 ? allHints.slice(0, 3) : allHints;
+  // Both rounds show all 4 hints in 2x2 grid
+  const displayHints = allHints;
+
+  // Round 2: Can't reveal last hint (index 3) until the end
+  // Round 1: Can reveal all hints
+  const canRevealHint = (index: number) => {
+    if (round === 2 && index === 3) {
+      // Last hint in Round 2 can only be revealed if all other hints are revealed
+      return revealedHintIndices.size >= 3;
+    }
+    // Can reveal if previous hint is revealed (or it's the first one)
+    return index === 0 || revealedHintIndices.has(index - 1);
+  };
+
+  const handleHintClick = (index: number) => {
+    // Only allow revealing if conditions are met
+    if (canRevealHint(index) && !revealedHintIndices.has(index)) {
+      setRevealedHintIndices(new Set([...revealedHintIndices, index]));
+    }
+  };
 
   // Determine what to show at the bottom
-  // Round 1: Show puzzle name when all hints revealed, otherwise "Round 1: Connections"
-  // Round 2: Show sequence name when last tile revealed (all 3 hints shown), otherwise "Round 2: Sequences"
-  const isAllHintsRevealed = round === 1 
-    ? revealedHints >= allHints.length 
-    : revealedHints >= 3; // Round 2 only shows 3 hints
+  // Only show puzzle/sequence name when host clicks "Reveal Answer"
+  const isAllHintsRevealed = revealedHintIndices.size >= 4;
 
-  const bottomText = round === 1
-    ? (isAllHintsRevealed && puzzleName ? puzzleName : `Round 1 : Connections`)
-    : (isAllHintsRevealed && sequenceName ? sequenceName : `Round 2 : Sequences`);
+  const bottomText = isAnswerRevealed
+    ? (round === 1 
+        ? (puzzleName || `Round 1 : Connections`)
+        : (sequenceName || `Round 2 : Sequences`))
+    : (round === 1 ? `Round 1 : Connections` : `Round 2 : Sequences`);
 
   return (
     <div
@@ -260,30 +284,76 @@ export function TileReveal({
           </div>
         </div>
 
-        {/* Middle Section - Grid of Hints */}
+        {/* Middle Section - Grid of Hints (2x2 for both rounds) */}
         <div className="flex-1 flex items-center justify-center min-h-0 py-2">
-          <div className={`grid gap-4 max-w-5xl w-full h-full px-8 ${
-            round === 2 ? 'grid-cols-3' : 'grid-cols-2'
-          }`}>
-            {displayHints.map((hint, index) => (
-              <div
-                key={index}
-                className="bg-blue-900/50 border-2 border-blue-400/30 rounded-lg p-6 flex items-center justify-center"
-              >
-                <p className="text-white text-xl text-center">{hint}</p>
-              </div>
-            ))}
+          <div className="grid grid-cols-2 gap-4 max-w-5xl w-full h-full px-8 auto-rows-fr">
+            {displayHints.map((hint, index) => {
+              const isRevealed = revealedHintIndices.has(index);
+              const isEmpty = !hint || hint.trim() === "";
+              const isClickable = !isRevealed && canRevealHint(index);
+              const hintType = hintTypes[index] || "text";
+              const hintFile = hintFiles[index];
+              
+              return (
+                <div
+                  key={index}
+                  onClick={() => isClickable && handleHintClick(index)}
+                  className={`bg-blue-900/50 border-2 rounded-lg p-6 flex items-center justify-center transition-all overflow-hidden min-h-0 ${
+                    isClickable
+                      ? 'border-blue-400/50 cursor-pointer hover:border-blue-400 hover:bg-blue-900/70'
+                      : isRevealed
+                      ? 'border-blue-400/30'
+                      : 'border-blue-400/20 opacity-50 cursor-not-allowed'
+                  }`}
+                >
+                  {isRevealed ? (
+                    <div className="w-full h-full flex items-center justify-center overflow-hidden min-h-0">
+                      {hintType === "image" && hintFile ? (
+                        <img
+                          src={hintFile}
+                          alt={`Hint ${index + 1}`}
+                          className="max-w-full max-h-full w-auto h-auto object-contain"
+                          style={{ maxHeight: 'calc(100% - 1rem)', maxWidth: 'calc(100% - 1rem)' }}
+                        />
+                      ) : hintType === "audio" && hintFile ? (
+                        <audio
+                          src={hintFile}
+                          controls
+                          className="w-full max-w-md"
+                        />
+                      ) : (
+                        <p className="text-white text-xl text-center">
+                          {isEmpty ? `Hint ${index + 1}` : hint}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-white/40 text-xl text-center">
+                      {round === 2 && index === 3 ? "Final hint" : "Click to reveal"}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
         {/* Divider */}
         <div className="flex-shrink-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent mx-8" />
 
-        {/* Bottom Section - Round Name or Puzzle/Sequence Name */}
-        <div className="flex-shrink-0 flex items-center justify-center py-3">
-          <p className="text-white/80 text-base tracking-wider">
+        {/* Bottom Section - Round Name or Puzzle/Sequence Name with Reveal Answer Button */}
+        <div className="flex-shrink-0 flex flex-col items-center justify-center py-6 space-y-3">
+          <p className="text-white/80 text-xl font-semibold tracking-wider">
             {bottomText}
           </p>
+          {isAllHintsRevealed && !isAnswerRevealed && (
+            <button
+              onClick={() => setIsAnswerRevealed(true)}
+              className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-base font-semibold transition-colors"
+            >
+              Reveal Answer
+            </button>
+          )}
         </div>
       </div>
     </div>

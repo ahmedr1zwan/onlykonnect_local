@@ -19,10 +19,14 @@ interface PuzzleData {
   round1: {
     hints: string[];
     puzzleName: string;
+    hintTypes: ("text" | "image" | "audio")[];
+    hintFiles: (string | null)[];
   };
   round2: {
     hints: string[];
     sequenceName: string;
+    hintTypes: ("text" | "image" | "audio")[];
+    hintFiles: (string | null)[];
   };
 }
 
@@ -152,6 +156,12 @@ export default function Start() {
           const hints = currentRound === 1 
             ? (puzzle?.round1.hints || [])
             : (puzzle?.round2.hints || []);
+          const hintTypes = currentRound === 1
+            ? (puzzle?.round1.hintTypes || [])
+            : (puzzle?.round2.hintTypes || []);
+          const hintFiles = currentRound === 1
+            ? (puzzle?.round1.hintFiles || [])
+            : (puzzle?.round2.hintFiles || []);
           const puzzleName = currentRound === 1 ? puzzle?.round1.puzzleName : undefined;
           const sequenceName = currentRound === 2 ? puzzle?.round2.sequenceName : undefined;
           
@@ -161,6 +171,8 @@ export default function Start() {
               round={currentRound}
               onClose={handleRevealClose}
               hints={hints}
+              hintTypes={hintTypes}
+              hintFiles={hintFiles}
               puzzleName={puzzleName}
               sequenceName={sequenceName}
             />
