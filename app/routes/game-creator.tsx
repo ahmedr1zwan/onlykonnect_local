@@ -32,6 +32,13 @@ interface PuzzleData {
 }
 
 const STORAGE_KEY = "onlyconnect_puzzles";
+const TEAM_NAMES_KEY = "onlyconnect_team_names";
+const TIMER_SETTINGS_KEY = "onlyconnect_timer_settings";
+
+interface TeamNames {
+  team1: string;
+  team2: string;
+}
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -40,12 +47,39 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+interface TimerSettings {
+  defaultGuessingTime: number;
+  defaultStealTime: number;
+}
+
 export default function GameCreator() {
   const [puzzles, setPuzzles] = useState<Record<number, PuzzleData>>({});
   const [selectedTile, setSelectedTile] = useState<number | null>(null);
   const [currentPuzzle, setCurrentPuzzle] = useState<PuzzleData | null>(null);
+  const [teamNames, setTeamNames] = useState<TeamNames>({ team1: "1", team2: "2" });
+  const [timerSettings, setTimerSettings] = useState<TimerSettings>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(TIMER_SETTINGS_KEY);
+      return stored ? JSON.parse(stored) : { defaultGuessingTime: 40, defaultStealTime: 15 };
+    }
+    return { defaultGuessingTime: 40, defaultStealTime: 15 };
+  });
 
   useEffect(() => {
+    // Load team names from localStorage
+    const storedTeamNames = localStorage.getItem(TEAM_NAMES_KEY);
+    if (storedTeamNames) {
+      setTeamNames(JSON.parse(storedTeamNames));
+    }
+
+    // Load timer settings from localStorage
+    if (typeof window !== "undefined") {
+      const storedTimerSettings = localStorage.getItem(TIMER_SETTINGS_KEY);
+      if (storedTimerSettings) {
+        setTimerSettings(JSON.parse(storedTimerSettings));
+      }
+    }
+
     // Load puzzles from localStorage
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
@@ -144,6 +178,18 @@ export default function GameCreator() {
     alert("Puzzle saved!");
   };
 
+  const handleTeamNameChange = (team: "team1" | "team2", name: string) => {
+    const updated = { ...teamNames, [team]: name };
+    setTeamNames(updated);
+    localStorage.setItem(TEAM_NAMES_KEY, JSON.stringify(updated));
+  };
+
+  const handleTimerSettingsChange = (setting: keyof TimerSettings, value: number) => {
+    const updated = { ...timerSettings, [setting]: value };
+    setTimerSettings(updated);
+    localStorage.setItem(TIMER_SETTINGS_KEY, JSON.stringify(updated));
+  };
+
   const handleRound1HintChange = (index: number, value: string) => {
     if (!currentPuzzle) return;
     const newHints = [...currentPuzzle.round1.hints];
@@ -216,6 +262,84 @@ export default function GameCreator() {
           <Link to="/" className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
             Back to Home
           </Link>
+        </div>
+
+        {/* Team Names Section */}
+        <div className="mb-8 border-2 border-gray-300 rounded-lg p-4">
+          <h2 className="text-xl font-semibold mb-4">Team Names</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Team 1 Name
+              </label>
+              <input
+                type="text"
+                value={teamNames.team1}
+                onChange={(e) => handleTeamNameChange("team1", e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded"
+                placeholder="Enter team 1 name"
+              />
+              <p className="text-xs text-gray-500 mt-1">Will display as "Team {teamNames.team1}"</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Team 2 Name
+              </label>
+              <input
+                type="text"
+                value={teamNames.team2}
+                onChange={(e) => handleTeamNameChange("team2", e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded"
+                placeholder="Enter team 2 name"
+              />
+              <p className="text-xs text-gray-500 mt-1">Will display as "Team {teamNames.team2}"</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Timer Settings Section */}
+        <div className="mb-8 border-2 border-gray-300 rounded-lg p-4">
+          <h2 className="text-xl font-semibold mb-4">Timer Settings</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Default Guessing Time: {timerSettings.defaultGuessingTime}s
+              </label>
+              <input
+                type="range"
+                min="10"
+                max="60"
+                step="5"
+                value={timerSettings.defaultGuessingTime}
+                onChange={(e) => handleTimerSettingsChange("defaultGuessingTime", parseInt(e.target.value))}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              />
+              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <span>10s</span>
+                <span>60s</span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Initial time when puzzle starts</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Default Steal Time: {timerSettings.defaultStealTime}s
+              </label>
+              <input
+                type="range"
+                min="5"
+                max="30"
+                step="1"
+                value={timerSettings.defaultStealTime}
+                onChange={(e) => handleTimerSettingsChange("defaultStealTime", parseInt(e.target.value))}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              />
+              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <span>5s</span>
+                <span>30s</span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Time for steal attempts</p>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-8">
