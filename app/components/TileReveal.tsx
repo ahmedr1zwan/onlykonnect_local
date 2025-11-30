@@ -212,6 +212,12 @@ export function TileReveal({
     // Only allow revealing if conditions are met
     if (canRevealHint(index) && !revealedHintIndices.has(index)) {
       setRevealedHintIndices(new Set([...revealedHintIndices, index]));
+      // Play sound when hint is revealed
+      if (typeof window !== "undefined") {
+        const audio = new Audio("/sounds/solveClue.mp3");
+        audio.volume = sfxVolume;
+        audio.play().catch((e) => console.error("Error playing hint reveal sound:", e));
+      }
     }
   };
 
@@ -233,8 +239,11 @@ export function TileReveal({
       onClick={onClose}
     >
       <div
-        className="h-full w-full bg-gradient-to-br from-blue-950 to-blue-900 flex flex-col relative overflow-hidden"
+        className="h-full w-full bg-gradient-to-br from-blue-200 via-blue-300 to-blue-400 flex flex-col relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
+        style={{
+          background: 'linear-gradient(to bottom right, #c6dcff, #a6c6ff, #83a9ff)',
+        }}
       >
         {/* Done Button - Top Right */}
         <button
@@ -254,22 +263,22 @@ export function TileReveal({
 
         {/* Top Section - Hieroglyphic Name */}
         <div className="flex-shrink-0 flex flex-col items-center justify-center pt-8 pb-2">
-          <h1 className="text-white text-3xl font-bold tracking-wider">
+          <h1 className="text-blue-900 text-3xl font-bold tracking-wider">
             {tile.symbol}
           </h1>
         </div>
 
         {/* Divider */}
-        <div className="flex-shrink-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent mx-8" />
+        <div className="flex-shrink-0 h-px bg-gradient-to-r from-transparent via-blue-900/20 to-transparent mx-8" />
 
         {/* Timer - Just Above Hints */}
         <div className="flex-shrink-0 flex justify-center py-2 px-8">
-          <div className="bg-gray-800/90 border-2 border-blue-400/30 rounded-lg px-6 py-4 flex flex-col items-center gap-3 w-full max-w-2xl">
+          <div className="bg-white/80 backdrop-blur-sm border-2 border-blue-500/40 rounded-lg px-6 py-4 flex flex-col items-center gap-3 w-full max-w-2xl shadow-lg">
             {/* Timer Progress Bar */}
             <div className="w-full">
               <div className="flex items-center justify-between mb-2">
                 <span className={`text-2xl font-bold ${
-                  time <= 10 ? 'text-red-400' : 'text-white'
+                  time <= 10 ? 'text-red-600' : 'text-blue-900'
                 }`}>
                   {time}s
                 </span>
@@ -301,7 +310,7 @@ export function TileReveal({
               </div>
               
               {/* Progress Bar */}
-              <div className="w-full h-4 bg-gray-700 rounded-full overflow-hidden">
+              <div className="w-full h-4 bg-blue-200 rounded-full overflow-hidden">
                 <div
                   className={`h-full transition-all duration-1000 ${
                     time <= defaultGuessingTime / 4 ? 'bg-red-500' : time <= defaultGuessingTime / 2 ? 'bg-yellow-500' : 'bg-blue-500'
@@ -316,7 +325,7 @@ export function TileReveal({
             {/* Steal Time Slider - Show when paused */}
             {!isTimerActive && time > 0 && (
               <div className="flex items-center gap-3 pt-2 border-t border-gray-600/50 w-full">
-                <span className="text-white/70 text-sm">Steal Time:</span>
+                <span className="text-blue-900/70 text-sm">Steal Time:</span>
                 <input
                   type="range"
                   min="5"
@@ -325,7 +334,7 @@ export function TileReveal({
                   onChange={(e) => setStealTime(Number(e.target.value))}
                   className="flex-1 h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
                 />
-                <span className="text-white text-sm font-semibold min-w-[2.5rem] text-center">
+                <span className="text-blue-900 text-sm font-semibold min-w-[2.5rem] text-center">
                   {stealTime}s
                 </span>
               </div>
@@ -334,7 +343,7 @@ export function TileReveal({
             {/* Steal Controls - Show when timer reaches 0 */}
             {showStealControls && (
               <div className="flex items-center gap-3 pt-2 border-t border-gray-600/50 w-full">
-                <span className="text-white/70 text-sm">Steal Time:</span>
+                <span className="text-blue-900/70 text-sm">Steal Time:</span>
                 <input
                   type="range"
                   min="5"
@@ -343,7 +352,7 @@ export function TileReveal({
                   onChange={(e) => setStealTime(Number(e.target.value))}
                   className="flex-1 h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
                 />
-                <span className="text-white text-sm font-semibold min-w-[2.5rem] text-center">
+                <span className="text-blue-900 text-sm font-semibold min-w-[2.5rem] text-center">
                   {stealTime}s
                 </span>
                 <button
@@ -371,12 +380,12 @@ export function TileReveal({
                 <div
                   key={index}
                   onClick={() => isClickable && handleHintClick(index)}
-                  className={`bg-blue-900/50 border-2 rounded-lg p-6 flex items-center justify-center transition-all overflow-hidden min-h-0 ${
+                  className={`bg-blue-400/30 border-2 rounded-lg p-6 flex items-center justify-center transition-all overflow-hidden min-h-0 ${
                     isClickable
-                      ? 'border-blue-400/50 cursor-pointer hover:border-blue-400 hover:bg-blue-900/70'
+                      ? 'border-blue-300/90 cursor-pointer hover:border-blue-400 hover:bg-blue-300/50'
                       : isRevealed
-                      ? 'border-blue-400/30'
-                      : 'border-blue-400/20 opacity-50 cursor-not-allowed'
+                      ? 'border-blue-300/60'
+                      : 'border-blue-300/30 opacity-50 cursor-not-allowed'
                   }`}
                 >
                   {isRevealed ? (
@@ -395,13 +404,13 @@ export function TileReveal({
                           className="w-full max-w-md"
                         />
                       ) : (
-                        <p className="text-white text-xl text-center">
-                          {isEmpty ? `Hint ${index + 1}` : hint}
-                        </p>
+                              <p className="text-blue-900 text-xl text-center">
+                                {isEmpty ? `Hint ${index + 1}` : hint}
+                              </p>
                       )}
                     </div>
                   ) : (
-                    <p className="text-white/40 text-xl text-center">
+                    <p className="text-blue-900/40 text-xl text-center">
                       {round === 2 && index === 3 ? "Final hint" : "Click to reveal"}
                     </p>
                   )}
@@ -412,11 +421,11 @@ export function TileReveal({
         </div>
 
         {/* Divider */}
-        <div className="flex-shrink-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent mx-8" />
+        <div className="flex-shrink-0 h-px bg-gradient-to-r from-transparent via-blue-900/20 to-transparent mx-8" />
 
         {/* Bottom Section - Round Name or Puzzle/Sequence Name with Reveal Answer Button */}
         <div className="flex-shrink-0 flex flex-col items-center justify-center py-6 space-y-3">
-          <p className="text-white/80 text-xl font-semibold tracking-wider">
+          <p className="text-blue-900/90 text-xl font-semibold tracking-wider">
             {bottomText}
           </p>
           {isAllHintsRevealed && !isAnswerRevealed && (

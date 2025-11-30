@@ -14,9 +14,10 @@ interface TileGridProps {
   onTileClick: (tileId: number, symbol: string) => void;
   selectedTileIds: number[];
   disabled?: boolean;
+  sfxVolume?: number;
 }
 
-export function TileGrid({ onTileClick, selectedTileIds, disabled = false }: TileGridProps) {
+export function TileGrid({ onTileClick, selectedTileIds, disabled = false, sfxVolume = 0.7 }: TileGridProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-10 md:gap-16 w-full max-w-6xl mx-auto px-4">
       {tiles.map((tile) => {
@@ -35,6 +36,7 @@ export function TileGrid({ onTileClick, selectedTileIds, disabled = false }: Til
             Icon={tile.icon}
             onClick={() => onTileClick(tile.id, tile.symbol)}
             disabled={disabled}
+            sfxVolume={sfxVolume}
           />
         );
       })}

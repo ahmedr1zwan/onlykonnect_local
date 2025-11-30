@@ -178,7 +178,7 @@ export default function Start() {
   const tilesSelectedThisRound = currentRoundTiles.length;
 
   return (
-    <div className="h-screen bg-white flex flex-col items-center justify-center p-4 overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-blue-50 via-blue-100/50 to-blue-50 flex flex-col items-center justify-center p-4 overflow-hidden">
       <div className="max-w-6xl w-full h-full flex flex-col">
         {/* Top Left Controls */}
         <div className="flex-shrink-0 mb-2 flex items-center gap-4">
@@ -230,21 +230,21 @@ export default function Start() {
         </div>
 
         {/* Host Controls Panel - Smaller */}
-        <div className="flex-shrink-0 bg-gray-100 rounded-lg p-2 mb-4">
+        <div className="flex-shrink-0 bg-gradient-to-br from-blue-200/80 to-blue-300/80 backdrop-blur-sm rounded-lg p-2 mb-4 border border-blue-400/30 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <p className="text-xs font-semibold text-gray-700">Round {currentRound}</p>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs font-semibold text-blue-900">Round {currentRound}</p>
+              <p className="text-xs text-blue-800">
                 Team {teamNames[currentTeam] || (currentTeam === "team1" ? "1" : "2")}'s Turn
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-blue-700">
                 Remaining: {6 - tilesSelectedThisRound}/6
               </p>
             </div>
             {currentRound === 1 && tilesSelectedThisRound === 6 && (
               <button
                 onClick={handleNextRound}
-                className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 transition"
+                className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 transition shadow-sm"
               >
                 Start Round 2
               </button>
@@ -253,8 +253,8 @@ export default function Start() {
         </div>
 
         {/* Game Title */}
-        <div className="flex-shrink-0 text-center mt-12">
-          <h1 className="text-black/80 text-3xl md:text-4xl lg:text-5xl font-bold tracking-wider">
+        <div className="flex-shrink-0 text-center mt-8">
+          <h1 className="text-black/80 text-xl md:text-2xl lg:text-3xl font-bold tracking-wider">
             Round {currentRound}: {currentRound === 1 ? "Connections" : "Sequences"}
           </h1>
           <div className="h-px bg-gradient-to-r from-transparent via-black/20 to-transparent opacity-30" />
@@ -266,6 +266,7 @@ export default function Start() {
             onTileClick={handleTileClick}
             selectedTileIds={currentRoundTiles.map(t => t.id)}
             disabled={showReveal}
+            sfxVolume={sfxVolume}
           />
         </div>
 

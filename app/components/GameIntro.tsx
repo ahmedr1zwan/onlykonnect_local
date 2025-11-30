@@ -24,8 +24,8 @@ export function GameIntro({ onClose, sfxVolume }: GameIntroProps) {
   }, [sfxVolume]);
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-8 max-w-2xl w-full mx-4">
+    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center overflow-hidden">
+      <div className="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 relative z-10">
         <h2 className="text-3xl font-bold mb-6 text-center">Only Connect</h2>
         
         <div className="space-y-4 mb-6">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 interface TileButtonProps {
   symbol: string;
@@ -6,6 +6,7 @@ interface TileButtonProps {
   onClick?: () => void;
   isSelected?: boolean;
   disabled?: boolean;
+  sfxVolume?: number;
 }
 
 export function TileButton({ 
@@ -13,9 +14,12 @@ export function TileButton({
   Icon, 
   onClick,
   isSelected = false,
-  disabled = false
+  disabled = false,
+  sfxVolume = 0.7
 }: TileButtonProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const hoverSoundRef = useRef<HTMLAudioElement | null>(null);
+  const hasPlayedSoundRef = useRef(false);
 
   return (
     <button
@@ -28,8 +32,26 @@ export function TileButton({
         }
         ${disabled && !isSelected ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
       `}
-      onMouseEnter={() => !disabled && !isSelected && setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => {
+        if (!disabled && !isSelected) {
+          setIsHovered(true);
+          // Play hover sound only once per hover
+          if (!hasPlayedSoundRef.current && typeof window !== "undefined") {
+            const audio = new Audio("/sounds/solveClue.mp3");
+            audio.volume = sfxVolume;
+            audio.play().catch((e) => console.error("Error playing hover sound:", e));
+            hoverSoundRef.current = audio;
+            hasPlayedSoundRef.current = true;
+          }
+        }
+      }}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        hasPlayedSoundRef.current = false;
+        if (hoverSoundRef.current) {
+          hoverSoundRef.current = null;
+        }
+      }}
       onClick={onClick}
       disabled={disabled || isSelected}
       aria-label={symbol}
@@ -37,7 +59,7 @@ export function TileButton({
       <div className="absolute inset-0 bg-gradient-to-br from-blue-400/0 to-blue-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       
       <div className="relative h-full flex items-center justify-center">
-        <Icon className={`w-32 h-32 md:w-40 md:h-40 lg:w-52 lg:h-52 transition-transform duration-300 ${
+        <Icon className={`w-32 h-32 md:w-40 md:h-40 lg:w-40 lg:h-40 transition-transform duration-300 ${
           isHovered && !disabled && !isSelected ? 'scale-110' : 'scale-100'
         }`} />
       </div>
