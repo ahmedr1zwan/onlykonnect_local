@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { isMuted, registerAudio } from "../utils/audioManager";
 
 interface TileButtonProps {
   symbol: string;
@@ -36,12 +37,13 @@ export function TileButton({
         if (!disabled && !isSelected) {
           setIsHovered(true);
           // Play hover sound only once per hover
-          if (!hasPlayedSoundRef.current && typeof window !== "undefined") {
+          if (!hasPlayedSoundRef.current && typeof window !== "undefined" && !isMuted()) {
             const audio = new Audio("/sounds/solveClue.mp3");
             audio.volume = sfxVolume;
             audio.play().catch((e) => console.error("Error playing hover sound:", e));
             hoverSoundRef.current = audio;
             hasPlayedSoundRef.current = true;
+            registerAudio(audio);
           }
         }
       }}

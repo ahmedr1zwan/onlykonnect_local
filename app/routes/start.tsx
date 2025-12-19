@@ -3,7 +3,6 @@ import type { Route } from "./+types/start";
 import { Link } from "react-router";
 import { TileGrid } from "../components/TileGrid";
 import { TileReveal } from "../components/TileReveal";
-import { SoundSettings } from "../components/SoundSettings";
 import { ReadyPopup } from "../components/ReadyPopup";
 
 type Round = 1 | 2;
@@ -65,7 +64,6 @@ export default function Start() {
   const [puzzles, setPuzzles] = useState<Record<number, PuzzleData>>({});
   const [teamNames, setTeamNames] = useState<TeamNames>({ team1: "1", team2: "2" });
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [showSettings, setShowSettings] = useState(false);
   const [showReady, setShowReady] = useState(false);
   const [sfxVolume, setSfxVolume] = useState(() => {
     if (typeof window !== "undefined") {
@@ -169,10 +167,32 @@ export default function Start() {
     localStorage.removeItem(GAME_STATE_KEY);
   };
 
-  const handleSfxVolumeChange = (volume: number) => {
-    setSfxVolume(volume);
-    localStorage.setItem(SFX_VOLUME_KEY, volume.toString());
-  };
+  // Listen for volume changes from GlobalSoundControls
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === SFX_VOLUME_KEY && e.newValue) {
+        setSfxVolume(parseFloat(e.newValue));
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom event for same-tab updates
+    const handleVolumeChange = () => {
+      const stored = localStorage.getItem(SFX_VOLUME_KEY);
+      if (stored) {
+        setSfxVolume(parseFloat(stored));
+      }
+    };
+    
+    // Custom event for same-tab updates (since storage event only fires in other tabs)
+    window.addEventListener('sfxVolumeChanged', handleVolumeChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('sfxVolumeChanged', handleVolumeChange);
+    };
+  }, []);
 
   const currentRoundTiles = selectedTiles.filter(t => t.round === currentRound);
   const tilesSelectedThisRound = currentRoundTiles.length;
@@ -181,7 +201,7 @@ export default function Start() {
     <div className="h-screen bg-gradient-to-br from-blue-50 via-blue-100/50 to-blue-50 flex flex-col items-center justify-center p-4 overflow-hidden">
       <div className="max-w-6xl w-full h-full flex flex-col">
         {/* Top Left Controls */}
-        <div className="flex-shrink-0 mb-2 flex items-center gap-4">
+        <div className="flex-shrink-0 mb-2">
           <Link
             to="/"
             className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
@@ -201,32 +221,6 @@ export default function Start() {
             </svg>
             <span className="text-sm font-medium">Back to Home</span>
           </Link>
-          {/* Settings Cog */}
-          <button
-            onClick={() => setShowSettings(true)}
-            className="text-gray-600 hover:text-gray-900 transition-colors"
-            aria-label="Open settings"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-          </button>
         </div>
 
         {/* Host Controls Panel - Smaller */}
@@ -312,13 +306,6 @@ export default function Start() {
           <ReadyPopup onReady={handleReady} sfxVolume={sfxVolume} />
         )}
         
-        {/* Settings Modal */}
-        <SoundSettings
-          sfxVolume={sfxVolume}
-          onSfxVolumeChange={handleSfxVolumeChange}
-          isOpen={showSettings}
-          onClose={() => setShowSettings(false)}
-        />
       </div>
     </div>
   );

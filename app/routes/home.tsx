@@ -56,6 +56,29 @@ export default function Home() {
     }
   }, []);
 
+  // Listen for volume changes from GlobalSoundControls
+  useEffect(() => {
+    const handleVolumeChange = () => {
+      if (typeof window !== "undefined") {
+        const stored = localStorage.getItem(SFX_VOLUME_KEY);
+        if (stored) {
+          setSfxVolume(parseFloat(stored));
+        }
+      }
+    };
+    
+    window.addEventListener('sfxVolumeChanged', handleVolumeChange);
+    window.addEventListener('storage', (e) => {
+      if (e.key === SFX_VOLUME_KEY && e.newValue) {
+        setSfxVolume(parseFloat(e.newValue));
+      }
+    });
+
+    return () => {
+      window.removeEventListener('sfxVolumeChanged', handleVolumeChange);
+    };
+  }, []);
+
   const handleNewGame = () => {
     // Clear game state
     localStorage.removeItem(GAME_STATE_KEY);

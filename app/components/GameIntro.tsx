@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { isMuted, registerAudio, unregisterAudio } from "../utils/audioManager";
 
 interface GameIntroProps {
   onClose: () => void;
@@ -10,13 +11,17 @@ export function GameIntro({ onClose, sfxVolume }: GameIntroProps) {
 
   useEffect(() => {
     // Play opening music
-    const audio = new Audio("/sounds/openingTitlesWithFlurry.mp3");
-    audio.volume = sfxVolume;
-    audio.play().catch((e) => console.error("Error playing opening music:", e));
-    audioRef.current = audio;
+    if (!isMuted()) {
+      const audio = new Audio("/sounds/openingTitlesWithFlurry.mp3");
+      audio.volume = sfxVolume;
+      audio.play().catch((e) => console.error("Error playing opening music:", e));
+      audioRef.current = audio;
+      registerAudio(audio);
+    }
 
     return () => {
       if (audioRef.current) {
+        unregisterAudio(audioRef.current);
         audioRef.current.pause();
         audioRef.current = null;
       }

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { isMuted, registerAudio, unregisterAudio } from "../utils/audioManager";
 
 interface ReadyPopupProps {
   onReady: () => void;
@@ -10,13 +11,17 @@ export function ReadyPopup({ onReady, sfxVolume }: ReadyPopupProps) {
 
   useEffect(() => {
     // Play ocFlurry sound
-    const audio = new Audio("/sounds/ocFlurry.mp3");
-    audio.volume = sfxVolume;
-    audio.play().catch((e) => console.error("Error playing ocFlurry:", e));
-    audioRef.current = audio;
+    if (!isMuted()) {
+      const audio = new Audio("/sounds/ocFlurry.mp3");
+      audio.volume = sfxVolume;
+      audio.play().catch((e) => console.error("Error playing ocFlurry:", e));
+      audioRef.current = audio;
+      registerAudio(audio);
+    }
 
     return () => {
       if (audioRef.current) {
+        unregisterAudio(audioRef.current);
         audioRef.current.pause();
         audioRef.current = null;
       }

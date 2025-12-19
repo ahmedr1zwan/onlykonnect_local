@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { TwoReeds, Lion, TwistedFlax, HornedViper, Water, EyeOfHorus } from "./Hieroglyphs";
+import { isMuted, registerAudio, unregisterAudio } from "../utils/audioManager";
 
 const TIMER_SETTINGS_KEY = "onlyconnect_timer_settings";
 
@@ -96,14 +97,18 @@ export function TileReveal({
     setRevealedHintIndices(new Set([0]));
     
     // Play gameplay music
-    const audio = new Audio("/sounds/gameplayBedLong.mp3");
-    audio.volume = sfxVolume;
-    audio.loop = true;
-    audio.play().catch((e) => console.error("Error playing gameplay music:", e));
-    gameplayAudioRef.current = audio;
+    if (!isMuted()) {
+      const audio = new Audio("/sounds/gameplayBedLong.mp3");
+      audio.volume = sfxVolume;
+      audio.loop = true;
+      audio.play().catch((e) => console.error("Error playing gameplay music:", e));
+      gameplayAudioRef.current = audio;
+      registerAudio(audio);
+    }
     
     return () => {
       if (gameplayAudioRef.current) {
+        unregisterAudio(gameplayAudioRef.current);
         gameplayAudioRef.current.pause();
         gameplayAudioRef.current = null;
       }
@@ -118,9 +123,12 @@ export function TileReveal({
             setIsTimerActive(false);
             setShowStealControls(true);
             // Play timeUp sound when timer hits 0
-            const audio = new Audio("/sounds/timeUp.mp3");
-            audio.volume = sfxVolume;
-            audio.play().catch((e) => console.error("Error playing timeUp sound:", e));
+            if (!isMuted()) {
+              const audio = new Audio("/sounds/timeUp.mp3");
+              audio.volume = sfxVolume;
+              audio.play().catch((e) => console.error("Error playing timeUp sound:", e));
+              registerAudio(audio);
+            }
             return 0;
           }
           return prev - 1;
@@ -213,10 +221,11 @@ export function TileReveal({
     if (canRevealHint(index) && !revealedHintIndices.has(index)) {
       setRevealedHintIndices(new Set([...revealedHintIndices, index]));
       // Play sound when hint is revealed
-      if (typeof window !== "undefined") {
+      if (typeof window !== "undefined" && !isMuted()) {
         const audio = new Audio("/sounds/solveClue.mp3");
         audio.volume = sfxVolume;
         audio.play().catch((e) => console.error("Error playing hint reveal sound:", e));
+        registerAudio(audio);
       }
     }
   };
@@ -250,6 +259,7 @@ export function TileReveal({
           onClick={() => {
             // Stop gameplay music when closing
             if (gameplayAudioRef.current) {
+              unregisterAudio(gameplayAudioRef.current);
               gameplayAudioRef.current.pause();
               gameplayAudioRef.current = null;
             }
@@ -437,9 +447,12 @@ export function TileReveal({
                   gameplayAudioRef.current = null;
                 }
                 // Play solveClue sound
-                const audio = new Audio("/sounds/solveClue.mp3");
-                audio.volume = sfxVolume;
-                audio.play().catch((e) => console.error("Error playing solveClue sound:", e));
+                if (!isMuted()) {
+                  const audio = new Audio("/sounds/solveClue.mp3");
+                  audio.volume = sfxVolume;
+                  audio.play().catch((e) => console.error("Error playing solveClue sound:", e));
+                  registerAudio(audio);
+                }
                 setIsAnswerRevealed(true);
               }}
               className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-base font-semibold transition-colors"
