@@ -2,6 +2,8 @@
 
 A web-based game inspired by the BBC's Only Connect quiz show. Play the connection game with custom puzzles, team scoring, and immersive audio.
 
+<img width="1920" height="900" alt="image" src="https://github.com/user-attachments/assets/b28aeb31-23b1-4789-9ebc-7673cefa6eff" />
+
 ## Features
 
 - 🎮 **Two-Round Gameplay**: Connections (Round 1) and Sequences (Round 2)
