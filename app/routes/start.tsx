@@ -50,7 +50,7 @@ interface TeamNames {
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Only Connect - Start" },
+    { title: "OnlyKonnect - Start" },
     { name: "description", content: "Select a category to begin the Only Connect game" },
   ];
 }
@@ -224,14 +224,14 @@ export default function Start() {
         </div>
 
         {/* Host Controls Panel - Smaller */}
-        <div className="flex-shrink-0 bg-gradient-to-br from-blue-200/80 to-blue-300/80 backdrop-blur-sm rounded-lg p-2 mb-4 border border-blue-400/30 shadow-sm">
+        <div className="flex-shrink-0 bg-white/90 rounded-lg p-2 mb-4 border border-blue-200/50 shadow-md">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <p className="text-xs font-semibold text-blue-900">Round {currentRound}</p>
-              <p className="text-xs text-blue-800">
+              <p className="text-xs text-blue-900">
                 Team {teamNames[currentTeam] || (currentTeam === "team1" ? "1" : "2")}'s Turn
               </p>
-              <p className="text-xs text-blue-700">
+              <p className="text-xs text-blue-900">
                 Remaining: {6 - tilesSelectedThisRound}/6
               </p>
             </div>

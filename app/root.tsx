@@ -12,6 +12,7 @@ import "./app.css";
 import { GlobalSoundControls } from "./components/GlobalSoundControls";
 
 export const links: Route.LinksFunction = () => [
+  { rel: "icon", href: "/scaryicon.ico"},
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",

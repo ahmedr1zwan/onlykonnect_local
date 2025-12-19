@@ -38,7 +38,7 @@ export function TileButton({
           setIsHovered(true);
           // Play hover sound only once per hover
           if (!hasPlayedSoundRef.current && typeof window !== "undefined" && !isMuted()) {
-            const audio = new Audio("/sounds/solveClue.mp3");
+            const audio = new Audio("/sounds/hoverButtonSound.mp3");
             audio.volume = sfxVolume;
             audio.play().catch((e) => console.error("Error playing hover sound:", e));
             hoverSoundRef.current = audio;
