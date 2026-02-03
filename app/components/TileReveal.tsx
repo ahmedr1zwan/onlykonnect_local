@@ -22,9 +22,9 @@ interface TileRevealProps {
   sfxVolume?: number; // Sound effects volume
 }
 
-const tileMap: Record<number, { 
-  symbol: string; 
-  Icon: React.ComponentType<{ className?: string }> 
+const tileMap: Record<number, {
+  symbol: string;
+  Icon: React.ComponentType<{ className?: string }>
 }> = {
   1: { symbol: "Two Reeds", Icon: TwoReeds },
   2: { symbol: "Lion", Icon: Lion },
@@ -34,10 +34,10 @@ const tileMap: Record<number, {
   6: { symbol: "Eye of Horus", Icon: EyeOfHorus },
 };
 
-export function TileReveal({ 
-  tileId, 
-  round, 
-  onClose, 
+export function TileReveal({
+  tileId,
+  round,
+  onClose,
   hints = [],
   hintTypes = [],
   hintFiles = [],
@@ -95,7 +95,7 @@ export function TileReveal({
     setIsAnswerRevealed(false);
     // Reset revealed hints - both rounds start with first hint revealed
     setRevealedHintIndices(new Set([0]));
-    
+
     // Play gameplay music
     if (!isMuted()) {
       const audio = new Audio("/sounds/gameplayBedLong.mp3");
@@ -105,7 +105,7 @@ export function TileReveal({
       gameplayAudioRef.current = audio;
       registerAudio(audio);
     }
-    
+
     return () => {
       if (gameplayAudioRef.current) {
         unregisterAudio(gameplayAudioRef.current);
@@ -164,8 +164,16 @@ export function TileReveal({
 
   const handleAdjustTime = (delta: number) => {
     if (!isTimerActive) {
-      setTime(prev => Math.max(0, Math.min(60, prev + delta)));
+      setTime(prev => Math.max(0, Math.min(150, prev + delta)));
     }
+  };
+
+  // Helper function to format time as m:ss when above 60 seconds
+  const formatTime = (seconds: number) => {
+    if (seconds >= 60) {
+      return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+    }
+    return `${seconds}s`;
   };
 
   const handleWrongAnswer = () => {
@@ -235,16 +243,15 @@ export function TileReveal({
   const isAllHintsRevealed = revealedHintIndices.size >= 4;
 
   const bottomText = isAnswerRevealed
-    ? (round === 1 
-        ? (puzzleName || `Round 1 : Connections`)
-        : (sequenceName || `Round 2 : Sequences`))
+    ? (round === 1
+      ? (puzzleName || `Round 1 : Connections`)
+      : (sequenceName || `Round 2 : Sequences`))
     : (round === 1 ? `Round 1 : Connections` : `Round 2 : Sequences`);
 
   return (
     <div
-      className={`fixed inset-0 bg-black z-50 transition-opacity duration-300 ${
-        isVisible ? "opacity-100" : "opacity-0"
-      }`}
+      className={`fixed inset-0 bg-black z-50 transition-opacity duration-300 ${isVisible ? "opacity-100" : "opacity-0"
+        }`}
       onClick={onClose}
     >
       <div
@@ -287,10 +294,9 @@ export function TileReveal({
             {/* Timer Progress Bar */}
             <div className="w-full">
               <div className="flex items-center justify-between mb-2">
-                <span className={`text-2xl font-bold ${
-                  time <= 10 ? 'text-red-600' : 'text-blue-900'
-                }`}>
-                  {time}s
+                <span className={`text-2xl font-bold ${time <= 10 ? 'text-red-600' : 'text-blue-900'
+                  }`}>
+                  {formatTime(time)}
                 </span>
                 <div className="flex gap-2">
                   <button
@@ -318,20 +324,19 @@ export function TileReveal({
                   </button>
                 </div>
               </div>
-              
+
               {/* Progress Bar */}
               <div className="w-full h-4 bg-blue-200 rounded-full overflow-hidden">
                 <div
-                  className={`h-full transition-all duration-1000 ${
-                    time <= defaultGuessingTime / 4 ? 'bg-red-500' : time <= defaultGuessingTime / 2 ? 'bg-yellow-500' : 'bg-blue-500'
-                  }`}
-                  style={{ 
-                    width: `${(time / defaultGuessingTime) * 100}%` 
+                  className={`h-full transition-all duration-1000 ${time <= defaultGuessingTime / 4 ? 'bg-red-500' : time <= defaultGuessingTime / 2 ? 'bg-yellow-500' : 'bg-blue-500'
+                    }`}
+                  style={{
+                    width: `${(time / defaultGuessingTime) * 100}%`
                   }}
                 />
               </div>
             </div>
-            
+
             {/* Steal Time Slider - Show when paused */}
             {!isTimerActive && time > 0 && (
               <div className="flex items-center gap-3 pt-2 border-t border-gray-600/50 w-full">
@@ -339,17 +344,17 @@ export function TileReveal({
                 <input
                   type="range"
                   min="5"
-                  max="30"
+                  max="90"
                   value={stealTime}
                   onChange={(e) => setStealTime(Number(e.target.value))}
                   className="flex-1 h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
                 />
-                <span className="text-blue-900 text-sm font-semibold min-w-[2.5rem] text-center">
-                  {stealTime}s
+                <span className="text-blue-900 text-sm font-semibold min-w-[3rem] text-center">
+                  {formatTime(stealTime)}
                 </span>
               </div>
             )}
-            
+
             {/* Steal Controls - Show when timer reaches 0 */}
             {showStealControls && (
               <div className="flex items-center gap-3 pt-2 border-t border-gray-600/50 w-full">
@@ -357,13 +362,13 @@ export function TileReveal({
                 <input
                   type="range"
                   min="5"
-                  max="30"
+                  max="90"
                   value={stealTime}
                   onChange={(e) => setStealTime(Number(e.target.value))}
                   className="flex-1 h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
                 />
-                <span className="text-blue-900 text-sm font-semibold min-w-[2.5rem] text-center">
-                  {stealTime}s
+                <span className="text-blue-900 text-sm font-semibold min-w-[3rem] text-center">
+                  {formatTime(stealTime)}
                 </span>
                 <button
                   onClick={handleStartSteal}
@@ -385,18 +390,17 @@ export function TileReveal({
               const isClickable = !isRevealed && canRevealHint(index);
               const hintType = hintTypes[index] || "text";
               const hintFile = hintFiles[index];
-              
+
               return (
                 <div
                   key={index}
                   onClick={() => isClickable && handleHintClick(index)}
-                  className={`bg-blue-400/30 border-2 rounded-lg p-6 flex items-center justify-center transition-all overflow-hidden min-h-0 ${
-                    isClickable
-                      ? 'border-blue-300/90 cursor-pointer hover:border-blue-400 hover:bg-blue-300/50'
-                      : isRevealed
+                  className={`bg-blue-400/30 border-2 rounded-lg p-6 flex items-center justify-center transition-all overflow-hidden min-h-0 ${isClickable
+                    ? 'border-blue-300/90 cursor-pointer hover:border-blue-400 hover:bg-blue-300/50'
+                    : isRevealed
                       ? 'border-blue-300/60'
                       : 'border-blue-300/30 opacity-50 cursor-not-allowed'
-                  }`}
+                    }`}
                 >
                   {isRevealed ? (
                     <div className="w-full h-full flex items-center justify-center overflow-hidden min-h-0">
@@ -414,9 +418,9 @@ export function TileReveal({
                           className="w-full max-w-md"
                         />
                       ) : (
-                              <p className="text-blue-900 text-xl text-center">
-                                {isEmpty ? `Hint ${index + 1}` : hint}
-                              </p>
+                        <p className="text-blue-900 text-xl text-center">
+                          {isEmpty ? `Hint ${index + 1}` : hint}
+                        </p>
                       )}
                     </div>
                   ) : (

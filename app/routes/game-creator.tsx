@@ -3,9 +3,9 @@ import type { Route } from "./+types/game-creator";
 import { Link } from "react-router";
 import { TwoReeds, Lion, TwistedFlax, HornedViper, Water, EyeOfHorus } from "../components/Hieroglyphs";
 
-const tileMap: Record<number, { 
-  symbol: string; 
-  Icon: React.ComponentType<{ className?: string }> 
+const tileMap: Record<number, {
+  symbol: string;
+  Icon: React.ComponentType<{ className?: string }>
 }> = {
   1: { symbol: "Two Reeds", Icon: TwoReeds },
   2: { symbol: "Lion", Icon: Lion },
@@ -40,7 +40,7 @@ interface TeamNames {
   team2: string;
 }
 
-export function meta({}: Route.MetaArgs) {
+export function meta({ }: Route.MetaArgs) {
   return [
     { title: "Only Connect - Game Creator" },
     { name: "description", content: "Create puzzles and hints for Only Connect game" },
@@ -154,14 +154,14 @@ export default function GameCreator() {
     setSelectedTile(tileId);
     setCurrentPuzzle(puzzles[tileId] || {
       tileId,
-      round1: { 
-        hints: ["", "", "", ""], 
+      round1: {
+        hints: ["", "", "", ""],
         puzzleName: "",
         hintTypes: ["text", "text", "text", "text"],
         hintFiles: [null, null, null, null],
       },
-      round2: { 
-        hints: ["", "", "", ""], 
+      round2: {
+        hints: ["", "", "", ""],
         sequenceName: "",
         hintTypes: ["text", "text", "text", "text"],
         hintFiles: [null, null, null, null],
@@ -171,7 +171,7 @@ export default function GameCreator() {
 
   const handleSave = () => {
     if (!selectedTile || !currentPuzzle) return;
-    
+
     const updated = { ...puzzles, [selectedTile]: currentPuzzle };
     setPuzzles(updated);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
@@ -219,12 +219,12 @@ export default function GameCreator() {
         img.onload = () => {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
-          
+
           if (!ctx) {
             reject(new Error('Could not get canvas context'));
             return;
           }
-          
+
           // Calculate new dimensions
           let width = img.width;
           let height = img.height;
@@ -232,11 +232,11 @@ export default function GameCreator() {
             height = (height * maxWidth) / width;
             width = maxWidth;
           }
-          
+
           canvas.width = width;
           canvas.height = height;
           ctx.drawImage(img, 0, 0, width, height);
-          
+
           // Convert to compressed Data URL
           const compressed = canvas.toDataURL('image/jpeg', quality);
           resolve(compressed);
@@ -261,17 +261,17 @@ export default function GameCreator() {
     const maxImageSize = 500 * 1024; // 500KB for images
     const maxAudioSize = 1000 * 1024; // 1MB for audio
     const maxSize = type === "image" ? maxImageSize : maxAudioSize;
-    
+
     if (file.size > maxSize) {
       const maxSizeMB = (maxSize / (1024 * 1024)).toFixed(1);
       const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
       alert(
         `File too large! Maximum size is ${maxSizeMB}MB, but your file is ${fileSizeMB}MB. ` +
-        (type === "image" 
+        (type === "image"
           ? "The image will be compressed automatically, but please try a smaller file if possible."
           : "Please compress your audio file or use a shorter clip.")
       );
-      
+
       // For images, still try to compress even if over limit
       if (type === "image") {
         try {
@@ -281,10 +281,10 @@ export default function GameCreator() {
             alert("File is still too large after compression. Please use a smaller image.");
             return;
           }
-          
+
           const newHintFiles = [...(round === 1 ? currentPuzzle.round1.hintFiles : currentPuzzle.round2.hintFiles)];
           const newHintTypes = [...(round === 1 ? currentPuzzle.round1.hintTypes : currentPuzzle.round2.hintTypes)];
-          
+
           newHintFiles[index] = compressed;
           newHintTypes[index] = type;
 
@@ -310,7 +310,7 @@ export default function GameCreator() {
         const compressed = await compressImage(file, 1920, 0.8);
         const newHintFiles = [...(round === 1 ? currentPuzzle.round1.hintFiles : currentPuzzle.round2.hintFiles)];
         const newHintTypes = [...(round === 1 ? currentPuzzle.round1.hintTypes : currentPuzzle.round2.hintTypes)];
-        
+
         newHintFiles[index] = compressed;
         newHintTypes[index] = type;
 
@@ -335,7 +335,7 @@ export default function GameCreator() {
       const dataUrl = reader.result as string;
       const newHintFiles = [...(round === 1 ? currentPuzzle.round1.hintFiles : currentPuzzle.round2.hintFiles)];
       const newHintTypes = [...(round === 1 ? currentPuzzle.round1.hintTypes : currentPuzzle.round2.hintTypes)];
-      
+
       newHintFiles[index] = dataUrl;
       newHintTypes[index] = type;
 
@@ -405,13 +405,15 @@ export default function GameCreator() {
             {/* Timer Settings - Compact */}
             <div>
               <label className="block text-xs font-medium mb-1 text-gray-700">
-                Guessing Time: {timerSettings.defaultGuessingTime}s
+                Guessing Time: {timerSettings.defaultGuessingTime >= 60
+                  ? `${Math.floor(timerSettings.defaultGuessingTime / 60)}:${String(timerSettings.defaultGuessingTime % 60).padStart(2, '0')}`
+                  : `${timerSettings.defaultGuessingTime}s`}
               </label>
               <input
                 type="range"
                 min="10"
-                max="60"
-                step="5"
+                max="150"
+                step="10"
                 value={timerSettings.defaultGuessingTime}
                 onChange={(e) => handleTimerSettingsChange("defaultGuessingTime", parseInt(e.target.value))}
                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
@@ -419,13 +421,15 @@ export default function GameCreator() {
             </div>
             <div>
               <label className="block text-xs font-medium mb-1 text-gray-700">
-                Steal Time: {timerSettings.defaultStealTime}s
+                Steal Time: {timerSettings.defaultStealTime >= 60
+                  ? `${Math.floor(timerSettings.defaultStealTime / 60)}:${String(timerSettings.defaultStealTime % 60).padStart(2, '0')}`
+                  : `${timerSettings.defaultStealTime}s`}
               </label>
               <input
                 type="range"
                 min="5"
-                max="30"
-                step="1"
+                max="90"
+                step="5"
                 value={timerSettings.defaultStealTime}
                 onChange={(e) => handleTimerSettingsChange("defaultStealTime", parseInt(e.target.value))}
                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
@@ -446,11 +450,10 @@ export default function GameCreator() {
                   <button
                     key={tileId}
                     onClick={() => handleTileSelect(tileId)}
-                    className={`p-4 border-2 rounded-lg transition-all ${
-                      selectedTile === tileId
+                    className={`p-4 border-2 rounded-lg transition-all ${selectedTile === tileId
                         ? "border-blue-600 bg-blue-50"
                         : "border-gray-300 hover:border-gray-400"
-                    }`}
+                      }`}
                   >
                     <div className="flex flex-col items-center gap-2">
                       <TileIcon className="w-12 h-12" />
@@ -475,197 +478,197 @@ export default function GameCreator() {
                     💾 Save Puzzle
                   </button>
                 </div>
-                
+
                 <div className="space-y-6">
                   <h2 className="text-xl font-semibold">Edit Puzzle for {tileMap[selectedTile].symbol}</h2>
 
-                {/* Round 1: Connections */}
-                <div className="border-2 border-gray-300 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold mb-3">Round 1: Connections</h3>
-                  <div className="space-y-3 mb-3">
-                    {currentPuzzle.round1.hints.map((hint, index) => {
-                      const hintType = currentPuzzle.round1.hintTypes?.[index] || "text";
-                      const hintFile = currentPuzzle.round1.hintFiles?.[index] || null;
-                      
-                      return (
-                      <div key={index} className="border border-gray-200 rounded p-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <label className="block text-sm font-medium">
-                            Hint {index + 1}
-                          </label>
-                          <select
-                            value={hintType}
-                            onChange={(e) => handleHintTypeChange(1, index, e.target.value as "text" | "image" | "audio")}
-                            className="px-2 py-1 text-xs border border-gray-300 rounded"
-                          >
-                            <option value="text">Text</option>
-                            <option value="image">Image</option>
-                            <option value="audio">Audio (MP3)</option>
-                          </select>
-                        </div>
-                        {hintType === "text" ? (
-                          <input
-                            type="text"
-                            value={hint}
-                            onChange={(e) => handleRound1HintChange(index, e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded"
-                            placeholder={`Enter hint ${index + 1}`}
-                          />
-                        ) : currentPuzzle.round1.hintTypes[index] === "image" ? (
-                          <div className="space-y-2">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleFileUpload(1, index, file, "image");
-                              }}
-                              className="w-full text-sm"
-                            />
-                            {hintFile && (
-                              <img
-                                src={hintFile}
-                                alt={`Hint ${index + 1}`}
-                                className="max-w-full h-32 object-contain border border-gray-300 rounded"
-                              />
-                            )}
-                          </div>
-                        ) : (
-                          <div className="space-y-2">
-                            <input
-                              type="file"
-                              accept="audio/mpeg,audio/*"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleFileUpload(1, index, file, "audio");
-                              }}
-                              className="w-full text-sm"
-                            />
-                            {hintFile && (
-                              <audio
-                                src={hintFile}
-                                controls
-                                className="w-full"
-                              />
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      );
-                    })}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Puzzle Name (Connection)
-                    </label>
-                    <input
-                      type="text"
-                      value={currentPuzzle.round1.puzzleName}
-                      onChange={(e) =>
-                        setCurrentPuzzle({
-                          ...currentPuzzle,
-                          round1: { ...currentPuzzle.round1, puzzleName: e.target.value },
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded"
-                      placeholder="e.g., Things that are red"
-                    />
-                  </div>
-                </div>
+                  {/* Round 1: Connections */}
+                  <div className="border-2 border-gray-300 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold mb-3">Round 1: Connections</h3>
+                    <div className="space-y-3 mb-3">
+                      {currentPuzzle.round1.hints.map((hint, index) => {
+                        const hintType = currentPuzzle.round1.hintTypes?.[index] || "text";
+                        const hintFile = currentPuzzle.round1.hintFiles?.[index] || null;
 
-                {/* Round 2: Sequences */}
-                <div className="border-2 border-gray-300 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold mb-3">Round 2: Sequences</h3>
-                  <div className="space-y-3 mb-3">
-                    {currentPuzzle.round2.hints.map((hint, index) => {
-                      const hintType = currentPuzzle.round2.hintTypes?.[index] || "text";
-                      const hintFile = currentPuzzle.round2.hintFiles?.[index] || null;
-                      
-                      return (
-                      <div key={index} className="border border-gray-200 rounded p-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <label className="block text-sm font-medium">
-                            Hint {index + 1}
-                          </label>
-                          <select
-                            value={hintType}
-                            onChange={(e) => handleHintTypeChange(2, index, e.target.value as "text" | "image" | "audio")}
-                            className="px-2 py-1 text-xs border border-gray-300 rounded"
-                          >
-                            <option value="text">Text</option>
-                            <option value="image">Image</option>
-                            <option value="audio">Audio (MP3)</option>
-                          </select>
-                        </div>
-                        {hintType === "text" ? (
-                          <input
-                            type="text"
-                            value={hint}
-                            onChange={(e) => handleRound2HintChange(index, e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded"
-                            placeholder={`Enter hint ${index + 1}`}
-                          />
-                        ) : hintType === "image" ? (
-                          <div className="space-y-2">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleFileUpload(2, index, file, "image");
-                              }}
-                              className="w-full text-sm"
-                            />
-                            {hintFile && (
-                              <img
-                                src={hintFile}
-                                alt={`Hint ${index + 1}`}
-                                className="max-w-full h-32 object-contain border border-gray-300 rounded"
+                        return (
+                          <div key={index} className="border border-gray-200 rounded p-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <label className="block text-sm font-medium">
+                                Hint {index + 1}
+                              </label>
+                              <select
+                                value={hintType}
+                                onChange={(e) => handleHintTypeChange(1, index, e.target.value as "text" | "image" | "audio")}
+                                className="px-2 py-1 text-xs border border-gray-300 rounded"
+                              >
+                                <option value="text">Text</option>
+                                <option value="image">Image</option>
+                                <option value="audio">Audio (MP3)</option>
+                              </select>
+                            </div>
+                            {hintType === "text" ? (
+                              <input
+                                type="text"
+                                value={hint}
+                                onChange={(e) => handleRound1HintChange(index, e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                placeholder={`Enter hint ${index + 1}`}
                               />
+                            ) : currentPuzzle.round1.hintTypes[index] === "image" ? (
+                              <div className="space-y-2">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleFileUpload(1, index, file, "image");
+                                  }}
+                                  className="w-full text-sm"
+                                />
+                                {hintFile && (
+                                  <img
+                                    src={hintFile}
+                                    alt={`Hint ${index + 1}`}
+                                    className="max-w-full h-32 object-contain border border-gray-300 rounded"
+                                  />
+                                )}
+                              </div>
+                            ) : (
+                              <div className="space-y-2">
+                                <input
+                                  type="file"
+                                  accept="audio/mpeg,audio/*"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleFileUpload(1, index, file, "audio");
+                                  }}
+                                  className="w-full text-sm"
+                                />
+                                {hintFile && (
+                                  <audio
+                                    src={hintFile}
+                                    controls
+                                    className="w-full"
+                                  />
+                                )}
+                              </div>
                             )}
                           </div>
-                        ) : (
-                          <div className="space-y-2">
-                            <input
-                              type="file"
-                              accept="audio/mpeg,audio/*"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleFileUpload(2, index, file, "audio");
-                              }}
-                              className="w-full text-sm"
-                            />
-                            {hintFile && (
-                              <audio
-                                src={hintFile}
-                                controls
-                                className="w-full"
+                        );
+                      })}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Puzzle Name (Connection)
+                      </label>
+                      <input
+                        type="text"
+                        value={currentPuzzle.round1.puzzleName}
+                        onChange={(e) =>
+                          setCurrentPuzzle({
+                            ...currentPuzzle,
+                            round1: { ...currentPuzzle.round1, puzzleName: e.target.value },
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                        placeholder="e.g., Things that are red"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Round 2: Sequences */}
+                  <div className="border-2 border-gray-300 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold mb-3">Round 2: Sequences</h3>
+                    <div className="space-y-3 mb-3">
+                      {currentPuzzle.round2.hints.map((hint, index) => {
+                        const hintType = currentPuzzle.round2.hintTypes?.[index] || "text";
+                        const hintFile = currentPuzzle.round2.hintFiles?.[index] || null;
+
+                        return (
+                          <div key={index} className="border border-gray-200 rounded p-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <label className="block text-sm font-medium">
+                                Hint {index + 1}
+                              </label>
+                              <select
+                                value={hintType}
+                                onChange={(e) => handleHintTypeChange(2, index, e.target.value as "text" | "image" | "audio")}
+                                className="px-2 py-1 text-xs border border-gray-300 rounded"
+                              >
+                                <option value="text">Text</option>
+                                <option value="image">Image</option>
+                                <option value="audio">Audio (MP3)</option>
+                              </select>
+                            </div>
+                            {hintType === "text" ? (
+                              <input
+                                type="text"
+                                value={hint}
+                                onChange={(e) => handleRound2HintChange(index, e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                placeholder={`Enter hint ${index + 1}`}
                               />
+                            ) : hintType === "image" ? (
+                              <div className="space-y-2">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleFileUpload(2, index, file, "image");
+                                  }}
+                                  className="w-full text-sm"
+                                />
+                                {hintFile && (
+                                  <img
+                                    src={hintFile}
+                                    alt={`Hint ${index + 1}`}
+                                    className="max-w-full h-32 object-contain border border-gray-300 rounded"
+                                  />
+                                )}
+                              </div>
+                            ) : (
+                              <div className="space-y-2">
+                                <input
+                                  type="file"
+                                  accept="audio/mpeg,audio/*"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleFileUpload(2, index, file, "audio");
+                                  }}
+                                  className="w-full text-sm"
+                                />
+                                {hintFile && (
+                                  <audio
+                                    src={hintFile}
+                                    controls
+                                    className="w-full"
+                                  />
+                                )}
+                              </div>
                             )}
                           </div>
-                        )}
-                      </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Sequence Name
+                      </label>
+                      <input
+                        type="text"
+                        value={currentPuzzle.round2.sequenceName}
+                        onChange={(e) =>
+                          setCurrentPuzzle({
+                            ...currentPuzzle,
+                            round2: { ...currentPuzzle.round2, sequenceName: e.target.value },
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                        placeholder="e.g., Fibonacci sequence"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Sequence Name
-                    </label>
-                    <input
-                      type="text"
-                      value={currentPuzzle.round2.sequenceName}
-                      onChange={(e) =>
-                        setCurrentPuzzle({
-                          ...currentPuzzle,
-                          round2: { ...currentPuzzle.round2, sequenceName: e.target.value },
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded"
-                      placeholder="e.g., Fibonacci sequence"
-                    />
-                  </div>
-                </div>
                 </div>
               </>
             ) : (
