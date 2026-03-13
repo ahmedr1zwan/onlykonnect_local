@@ -36,6 +36,7 @@ const STORAGE_KEY = "onlyconnect_puzzles";
 const GAME_STATE_KEY = "onlyconnect_game_state";
 const TEAM_NAMES_KEY = "onlyconnect_team_names";
 const SFX_VOLUME_KEY = "onlyconnect_sfx_volume";
+const STARTING_TEAMS_KEY = "onlyconnect_starting_teams";
 
 interface GameState {
   currentRound: Round;
@@ -93,6 +94,12 @@ export default function Start() {
       setCurrentRound(gameState.currentRound);
       setCurrentTeam(gameState.currentTeam);
       setSelectedTiles(gameState.selectedTiles);
+    } else {
+      // Use configured starting team for Round 1 if no saved game
+      const storedTeams = localStorage.getItem(STARTING_TEAMS_KEY);
+      if (storedTeams) {
+        setCurrentTeam(JSON.parse(storedTeams).round1);
+      }
     }
     
     // Mark initial load as complete
@@ -153,7 +160,14 @@ export default function Start() {
   const handleNextRound = () => {
     if (currentRound === 1) {
       setCurrentRound(2);
-      setCurrentTeam("team1");
+      
+      const storedTeams = localStorage.getItem(STARTING_TEAMS_KEY);
+      if (storedTeams) {
+        setCurrentTeam(JSON.parse(storedTeams).round2);
+      } else {
+        setCurrentTeam("team1");
+      }
+      
       // Reset selected tiles for round 2 (keep round 1 tiles for reference)
       setSelectedTiles(prev => prev.filter(t => t.round === 1));
     }
@@ -162,7 +176,8 @@ export default function Start() {
   const handleNewGame = () => {
     // Clear game state
     setCurrentRound(1);
-    setCurrentTeam("team1");
+    const storedTeams = localStorage.getItem(STARTING_TEAMS_KEY);
+    setCurrentTeam(storedTeams ? JSON.parse(storedTeams).round1 : "team1");
     setSelectedTiles([]);
     localStorage.removeItem(GAME_STATE_KEY);
   };

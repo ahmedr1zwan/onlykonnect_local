@@ -34,6 +34,12 @@ interface PuzzleData {
 const STORAGE_KEY = "onlyconnect_puzzles";
 const TEAM_NAMES_KEY = "onlyconnect_team_names";
 const TIMER_SETTINGS_KEY = "onlyconnect_timer_settings";
+const STARTING_TEAMS_KEY = "onlyconnect_starting_teams";
+
+interface StartingTeams {
+  round1: "team1" | "team2";
+  round2: "team1" | "team2";
+}
 
 interface TeamNames {
   team1: string;
@@ -57,6 +63,13 @@ export default function GameCreator() {
   const [selectedTile, setSelectedTile] = useState<number | null>(null);
   const [currentPuzzle, setCurrentPuzzle] = useState<PuzzleData | null>(null);
   const [teamNames, setTeamNames] = useState<TeamNames>({ team1: "1", team2: "2" });
+  const [startingTeams, setStartingTeams] = useState<StartingTeams>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(STARTING_TEAMS_KEY);
+      return stored ? JSON.parse(stored) : { round1: "team1", round2: "team1" };
+    }
+    return { round1: "team1", round2: "team1" };
+  });
   const [timerSettings, setTimerSettings] = useState<TimerSettings>(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(TIMER_SETTINGS_KEY);
@@ -182,6 +195,12 @@ export default function GameCreator() {
     const updated = { ...teamNames, [team]: name };
     setTeamNames(updated);
     localStorage.setItem(TEAM_NAMES_KEY, JSON.stringify(updated));
+  };
+
+  const handleStartingTeamChange = (round: "round1" | "round2", team: "team1" | "team2") => {
+    const updated = { ...startingTeams, [round]: team };
+    setStartingTeams(updated);
+    localStorage.setItem(STARTING_TEAMS_KEY, JSON.stringify(updated));
   };
 
   const handleTimerSettingsChange = (setting: keyof TimerSettings, value: number) => {
@@ -380,7 +399,7 @@ export default function GameCreator() {
 
         {/* Compact Settings Bar */}
         <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-3">
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
             {/* Team Names - Compact */}
             <div>
               <label className="block text-xs font-medium mb-1 text-gray-700">Team 1</label>
@@ -434,6 +453,29 @@ export default function GameCreator() {
                 onChange={(e) => handleTimerSettingsChange("defaultStealTime", parseInt(e.target.value))}
                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
               />
+            </div>
+            {/* Starting Teams */}
+            <div>
+              <label className="block text-xs font-medium mb-1 text-gray-700">R1 First Team</label>
+              <select
+                value={startingTeams.round1}
+                onChange={(e) => handleStartingTeamChange("round1", e.target.value as "team1" | "team2")}
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
+              >
+                <option value="team1">{teamNames.team1 ? teamNames.team1 : "Team 1"}</option>
+                <option value="team2">{teamNames.team2 ? teamNames.team2 : "Team 2"}</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1 text-gray-700">R2 First Team</label>
+              <select
+                value={startingTeams.round2}
+                onChange={(e) => handleStartingTeamChange("round2", e.target.value as "team1" | "team2")}
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
+              >
+                <option value="team1">{teamNames.team1 ? teamNames.team1 : "Team 1"}</option>
+                <option value="team2">{teamNames.team2 ? teamNames.team2 : "Team 2"}</option>
+              </select>
             </div>
           </div>
         </div>
