@@ -328,7 +328,7 @@ export function TileReveal({
               {/* Progress Bar */}
               <div className="w-full h-4 bg-blue-200 rounded-full overflow-hidden">
                 <div
-                  className={`h-full transition-all duration-1000 ${time <= defaultGuessingTime / 4 ? 'bg-red-500' : time <= defaultGuessingTime / 2 ? 'bg-yellow-500' : 'bg-blue-500'
+                  className={`h-full ${isTimerActive ? 'transition-all duration-1000 ease-linear' : 'transition-none'} ${time <= defaultGuessingTime / 4 ? 'bg-red-500' : time <= defaultGuessingTime / 2 ? 'bg-yellow-500' : 'bg-blue-500'
                     }`}
                   style={{
                     width: `${(time / defaultGuessingTime) * 100}%`
