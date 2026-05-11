@@ -6,6 +6,7 @@ import { GameIntro } from "../components/GameIntro";
 
 const GAME_STATE_KEY = "onlyconnect_game_state";
 const SFX_VOLUME_KEY = "onlyconnect_sfx_volume";
+const SKIP_INTRO_KEY = "onlyconnect_skip_intro";
 
 interface GameState {
   currentRound: 1 | 2;
@@ -82,7 +83,12 @@ export default function Home() {
   const handleNewGame = () => {
     // Clear game state
     localStorage.removeItem(GAME_STATE_KEY);
-    // Show intro popup
+
+    if (localStorage.getItem(SKIP_INTRO_KEY) === "true") {
+      navigate("/start");
+      return;
+    }
+
     setShowIntro(true);
   };
 
@@ -92,8 +98,8 @@ export default function Home() {
   };
 
   const handleStartGame = () => {
-    setShowIntro(false);
     navigate("/start");
+    setShowIntro(false);
   };
 
   return (
@@ -138,7 +144,7 @@ export default function Home() {
       </div>
     </div>
     {showIntro && (
-      <GameIntro onClose={handleStartGame} sfxVolume={sfxVolume} />
+      <GameIntro onComplete={handleStartGame} sfxVolume={sfxVolume} />
     )}
   </>
 );

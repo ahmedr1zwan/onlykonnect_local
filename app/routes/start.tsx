@@ -306,6 +306,8 @@ export default function Start() {
               tileId={revealingTileId}
               round={currentRound}
               onClose={handleRevealClose}
+              currentTeam={currentTeam}
+              teamNames={teamNames}
               hints={hints}
               hintTypes={hintTypes}
               hintFiles={hintFiles}

@@ -13,6 +13,11 @@ interface TileRevealProps {
   tileId: number;
   round: 1 | 2;
   onClose: () => void;
+  currentTeam?: "team1" | "team2";
+  teamNames?: {
+    team1: string;
+    team2: string;
+  };
   hints?: string[];
   hintTypes?: ("text" | "image" | "audio")[];
   hintFiles?: (string | null)[];
@@ -38,6 +43,8 @@ export function TileReveal({
   tileId,
   round,
   onClose,
+  currentTeam = "team1",
+  teamNames = { team1: "1", team2: "2" },
   hints = [],
   hintTypes = [],
   hintFiles = [],
@@ -67,6 +74,8 @@ export function TileReveal({
   });
   const [showStealControls, setShowStealControls] = useState(false);
   const [isAnswerRevealed, setIsAnswerRevealed] = useState(false);
+  const [timerMode, setTimerMode] = useState<"guess" | "steal">("guess");
+  const [activeTeam, setActiveTeam] = useState<"team1" | "team2">(currentTeam);
   // Both rounds start with first hint revealed, host clicks to reveal more
   const [revealedHintIndices, setRevealedHintIndices] = useState<Set<number>>(
     new Set([0]) // Both rounds start with first hint revealed
@@ -93,6 +102,8 @@ export function TileReveal({
     setIsTimerActive(true);
     setShowStealControls(false);
     setIsAnswerRevealed(false);
+    setTimerMode("guess");
+    setActiveTeam(currentTeam);
     // Reset revealed hints - both rounds start with first hint revealed
     setRevealedHintIndices(new Set([0]));
 
@@ -113,7 +124,7 @@ export function TileReveal({
         gameplayAudioRef.current = null;
       }
     };
-  }, [tileId, round, sfxVolume]);
+  }, [tileId, round, sfxVolume, currentTeam]);
 
   useEffect(() => {
     if (isTimerActive && time > 0) {
@@ -121,7 +132,10 @@ export function TileReveal({
         setTime((prev) => {
           if (prev <= 1) {
             setIsTimerActive(false);
-            setShowStealControls(true);
+            if (timerMode === "guess") {
+              setShowStealControls(true);
+              setActiveTeam(currentTeam === "team1" ? "team2" : "team1");
+            }
             // Play timeUp sound when timer hits 0
             if (!isMuted()) {
               const audio = new Audio("/sounds/timeUp.mp3");
@@ -145,7 +159,7 @@ export function TileReveal({
         clearInterval(intervalRef.current);
       }
     };
-  }, [isTimerActive, time, sfxVolume]);
+  }, [isTimerActive, time, sfxVolume, timerMode, currentTeam]);
 
   const handlePauseResume = () => {
     setIsTimerActive(prev => !prev);
@@ -155,6 +169,8 @@ export function TileReveal({
     setIsTimerActive(false);
     // Reset to default guessing time
     setTime(defaultGuessingTime);
+    setTimerMode("guess");
+    setActiveTeam(currentTeam);
     setShowStealControls(false);
     // Auto-start after reset
     setTimeout(() => {
@@ -177,22 +193,20 @@ export function TileReveal({
   };
 
   const handleWrongAnswer = () => {
-    // If timer is paused (team buzzed in), set to steal time for other team to steal
-    if (!isTimerActive && time > 0) {
-      setTime(stealTime);
-      setIsTimerActive(true);
-    }
-    // If timer reached 0, give other team a chance to steal
-    else if (time === 0 && showStealControls) {
-      setTime(stealTime);
-      setIsTimerActive(true);
-      setShowStealControls(false);
-    }
+    if (timerMode === "steal") return;
+
+    setTimerMode("steal");
+    setActiveTeam(currentTeam === "team1" ? "team2" : "team1");
+    setTime(stealTime);
+    setIsTimerActive(true);
+    setShowStealControls(false);
   };
 
   const handleStartSteal = () => {
     // When timer reaches 0, allow other team to steal with custom time
     if (time === 0 && showStealControls) {
+      setTimerMode("steal");
+      setActiveTeam(currentTeam === "team1" ? "team2" : "team1");
       setTime(stealTime);
       setIsTimerActive(true);
       setShowStealControls(false);
@@ -241,6 +255,10 @@ export function TileReveal({
   // Determine what to show at the bottom
   // Only show puzzle/sequence name when host clicks "Reveal Answer"
   const isAllHintsRevealed = revealedHintIndices.size >= 4;
+  const timerMax = timerMode === "steal" ? stealTime : defaultGuessingTime;
+  const activeTeamName = teamNames[activeTeam] || (activeTeam === "team1" ? "1" : "2");
+  const opposingTeam = currentTeam === "team1" ? "team2" : "team1";
+  const opposingTeamName = teamNames[opposingTeam] || (opposingTeam === "team1" ? "1" : "2");
 
   const bottomText = isAnswerRevealed
     ? (round === 1
@@ -294,10 +312,15 @@ export function TileReveal({
             {/* Timer Progress Bar */}
             <div className="w-full">
               <div className="flex items-center justify-between mb-2">
-                <span className={`text-2xl font-bold ${time <= 10 ? 'text-red-600' : 'text-blue-900'
-                  }`}>
-                  {formatTime(time)}
-                </span>
+                <div>
+                  <span className={`text-2xl font-bold ${time <= 10 ? 'text-red-600' : 'text-blue-900'
+                    }`}>
+                    {formatTime(time)}
+                  </span>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-blue-900/60">
+                    Team {activeTeamName} {timerMode === "steal" ? "steal" : "guess"}
+                  </p>
+                </div>
                 <div className="flex gap-2">
                   <button
                     onClick={handlePauseResume}
@@ -309,10 +332,11 @@ export function TileReveal({
                   {!isTimerActive && time > 0 && (
                     <button
                       onClick={handleWrongAnswer}
-                      className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-sm font-semibold transition-colors"
-                      title="Wrong answer - resume for other team"
+                      disabled={timerMode === "steal"}
+                      className="px-3 py-1.5 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded text-sm font-semibold transition-colors"
+                      title={timerMode === "steal" ? "No further steal after steal attempt" : `Wrong answer - Team ${opposingTeamName} steals`}
                     >
-                      ✗
+                      Wrong
                     </button>
                   )}
                   <button
@@ -328,19 +352,21 @@ export function TileReveal({
               {/* Progress Bar */}
               <div className="w-full h-4 bg-blue-200 rounded-full overflow-hidden">
                 <div
-                  className={`h-full ${isTimerActive ? 'transition-all duration-1000 ease-linear' : 'transition-none'} ${time <= defaultGuessingTime / 4 ? 'bg-red-500' : time <= defaultGuessingTime / 2 ? 'bg-yellow-500' : 'bg-blue-500'
+                  className={`h-full ${isTimerActive ? 'transition-all duration-1000 ease-linear' : 'transition-none'} ${time <= timerMax / 4 ? 'bg-red-500' : time <= timerMax / 2 ? 'bg-yellow-500' : 'bg-blue-500'
                     }`}
                   style={{
-                    width: `${(time / defaultGuessingTime) * 100}%`
+                    width: `${(time / timerMax) * 100}%`
                   }}
                 />
               </div>
             </div>
 
             {/* Steal Time Slider - Show when paused */}
-            {!isTimerActive && time > 0 && (
+            {!isTimerActive && time > 0 && timerMode === "guess" && (
               <div className="flex items-center gap-3 pt-2 border-t border-gray-600/50 w-full">
-                <span className="text-blue-900/70 text-sm">Steal Time:</span>
+                <span className="text-blue-900/70 text-sm">
+                  If Team {activeTeamName} is wrong, Team {opposingTeamName} gets:
+                </span>
                 <input
                   type="range"
                   min="5"
@@ -358,7 +384,9 @@ export function TileReveal({
             {/* Steal Controls - Show when timer reaches 0 */}
             {showStealControls && (
               <div className="flex items-center gap-3 pt-2 border-t border-gray-600/50 w-full">
-                <span className="text-blue-900/70 text-sm">Steal Time:</span>
+                <span className="text-blue-900/70 text-sm">
+                  Team {opposingTeamName} steal time:
+                </span>
                 <input
                   type="range"
                   min="5"
@@ -374,7 +402,7 @@ export function TileReveal({
                   onClick={handleStartSteal}
                   className="px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white rounded text-sm font-semibold transition-colors"
                 >
-                  Start
+                  Start Steal
                 </button>
               </div>
             )}

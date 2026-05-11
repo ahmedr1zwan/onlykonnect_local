@@ -35,6 +35,7 @@ const STORAGE_KEY = "onlyconnect_puzzles";
 const TEAM_NAMES_KEY = "onlyconnect_team_names";
 const TIMER_SETTINGS_KEY = "onlyconnect_timer_settings";
 const STARTING_TEAMS_KEY = "onlyconnect_starting_teams";
+const SKIP_INTRO_KEY = "onlyconnect_skip_intro";
 
 interface StartingTeams {
   round1: "team1" | "team2";
@@ -76,6 +77,12 @@ export default function GameCreator() {
       return stored ? JSON.parse(stored) : { defaultGuessingTime: 40, defaultStealTime: 15 };
     }
     return { defaultGuessingTime: 40, defaultStealTime: 15 };
+  });
+  const [skipIntro, setSkipIntro] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem(SKIP_INTRO_KEY) === "true";
+    }
+    return false;
   });
 
   useEffect(() => {
@@ -207,6 +214,11 @@ export default function GameCreator() {
     const updated = { ...timerSettings, [setting]: value };
     setTimerSettings(updated);
     localStorage.setItem(TIMER_SETTINGS_KEY, JSON.stringify(updated));
+  };
+
+  const handleSkipIntroChange = (enabled: boolean) => {
+    setSkipIntro(enabled);
+    localStorage.setItem(SKIP_INTRO_KEY, enabled.toString());
   };
 
   const handleRound1HintChange = (index: number, value: string) => {
@@ -399,7 +411,7 @@ export default function GameCreator() {
 
         {/* Compact Settings Bar */}
         <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-3">
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-7 gap-4">
             {/* Team Names - Compact */}
             <div>
               <label className="block text-xs font-medium mb-1 text-gray-700">Team 1</label>
@@ -476,6 +488,18 @@ export default function GameCreator() {
                 <option value="team1">{teamNames.team1 ? teamNames.team1 : "Team 1"}</option>
                 <option value="team2">{teamNames.team2 ? teamNames.team2 : "Team 2"}</option>
               </select>
+            </div>
+            <div>
+              <span className="block text-xs font-medium mb-1 text-gray-700">Opening</span>
+              <label className="flex h-[34px] items-center gap-2 rounded border border-gray-300 bg-white px-2 text-sm text-gray-800">
+                <input
+                  type="checkbox"
+                  checked={skipIntro}
+                  onChange={(e) => handleSkipIntroChange(e.target.checked)}
+                  className="h-4 w-4 accent-blue-600"
+                />
+                <span>Skip intro</span>
+              </label>
             </div>
           </div>
         </div>
