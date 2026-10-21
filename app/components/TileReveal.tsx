@@ -385,19 +385,19 @@ export function TileReveal({
         </div>
 
         {/* Host timer panel */}
-        <div className="flex-shrink-0 flex justify-center py-2 px-4 md:px-8">
-          <div className="ok-panel flex w-full max-w-4xl flex-wrap items-center gap-x-6 gap-y-3 px-5 py-4">
+        <div className="flex-shrink-0 flex justify-center py-1 px-4 md:px-8">
+          <div className="ok-panel flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-3 py-2">
             {/* Countdown ring */}
-            <div className="relative h-28 w-28 flex-shrink-0">
+            <div className="relative h-16 w-16 flex-shrink-0">
               <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90">
-                <circle cx="60" cy="60" r={RING_R} fill="none" stroke="#e0f2fe" strokeWidth="10" />
+                <circle cx="60" cy="60" r={RING_R} fill="none" stroke="#e0f2fe" strokeWidth="12" />
                 <circle
                   cx="60"
                   cy="60"
                   r={RING_R}
                   fill="none"
                   stroke={phase === "result" ? "#cbd5e1" : ringColor}
-                  strokeWidth="10"
+                  strokeWidth="12"
                   strokeLinecap="round"
                   strokeDasharray={RING_C}
                   strokeDashoffset={RING_C * (1 - fraction)}
@@ -406,11 +406,11 @@ export function TileReveal({
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span
-                  className={`text-3xl font-black tabular-nums leading-none ${phase !== "result" && fraction <= 0.25 ? "text-red-500" : "text-slate-800"}`}
+                  className={`text-xl font-black tabular-nums leading-none ${phase !== "result" && fraction <= 0.25 ? "text-red-500" : "text-slate-800"}`}
                 >
                   {formatTime(seconds)}
                 </span>
-                <span className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.2em] text-slate-400">
+                <span className="text-[0.5rem] font-bold uppercase tracking-[0.15em] text-slate-400">
                   {isRunning ? "seconds" : phase === "result" ? "done" : "paused"}
                 </span>
               </div>
@@ -420,15 +420,15 @@ export function TileReveal({
             <div className="min-w-[12rem] flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <span
-                  className={`rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.18em] ${phase === "steal" ? "bg-amber-100 text-amber-700" : phase === "result" ? "bg-slate-100 text-slate-600" : "bg-sky-100 text-sky-700"}`}
+                  className={`rounded-full px-2.5 py-0.5 text-[0.65rem] font-black uppercase tracking-[0.18em] ${phase === "steal" ? "bg-amber-100 text-amber-700" : phase === "result" ? "bg-slate-100 text-slate-600" : "bg-sky-100 text-sky-700"}`}
                 >
                   {phase === "steal" ? "Steal" : phase === "result" ? "Result" : "Guessing"}
                 </span>
-                <span className="text-lg font-black text-slate-800">Team {nameOf(activeTeam)}</span>
+                <span className="text-base font-black text-slate-800">Team {nameOf(activeTeam)}</span>
               </div>
-              <p className="mt-2 text-sm text-slate-600">{status}</p>
+              <p className="mt-0.5 text-xs text-slate-600">{status}</p>
               {(phase === "guess" || phase === "buzzed") && (
-                <p className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-sky-600">
+                <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-sky-600">
                   {phase === "buzzed"
                     ? `Buzzed on clue ${CLUE_POINTS.indexOf(buzzPoints) + 1} · worth ${buzzPoints}`
                     : `Clue ${revealedCount} showing · worth ${pointsNow}`}
@@ -441,11 +441,11 @@ export function TileReveal({
               {phase === "guess" && (
                 <>
                   {isRunning ? (
-                    <button onClick={handleBuzz} className="ok-btn ok-btn-amber px-8 py-4 text-lg">
+                    <button onClick={handleBuzz} className="ok-btn ok-btn-amber px-5 py-2.5">
                       Buzz · stop clock <Kbd>Space</Kbd>
                     </button>
                   ) : (
-                    <button onClick={() => setIsRunning(true)} className="ok-btn px-6 py-4">
+                    <button onClick={() => setIsRunning(true)} className="ok-btn px-5 py-2.5">
                       Resume clock <Kbd>Space</Kbd>
                     </button>
                   )}
@@ -454,10 +454,10 @@ export function TileReveal({
 
               {(phase === "buzzed" || phase === "steal") && (
                 <>
-                  <button onClick={handleCorrect} className="ok-btn ok-btn-green px-6 py-4">
+                  <button onClick={handleCorrect} className="ok-btn ok-btn-green px-5 py-2.5">
                     Correct · +{phase === "steal" ? STEAL_POINTS : buzzPoints} <Kbd>C</Kbd>
                   </button>
-                  <button onClick={handleWrong} className="ok-btn ok-btn-red px-6 py-4">
+                  <button onClick={handleWrong} className="ok-btn ok-btn-red px-5 py-2.5">
                     {phase === "steal" ? "Wrong" : `Wrong · Team ${nameOf(otherTeam)} steals`} <Kbd>W</Kbd>
                   </button>
                 </>
@@ -466,7 +466,7 @@ export function TileReveal({
               {phase === "result" && (
                 <>
                   {!isAnswerRevealed && (
-                    <button onClick={revealAnswer} className="ok-btn ok-btn-green px-6 py-4">
+                    <button onClick={revealAnswer} className="ok-btn ok-btn-green px-5 py-2.5">
                       Reveal answer
                     </button>
                   )}
@@ -477,9 +477,9 @@ export function TileReveal({
               )}
             </div>
 
-            {/* Secondary clock controls */}
+            {/* Secondary clock controls, kept small beside the main actions */}
             {phase !== "result" && (
-              <div className="flex w-full flex-wrap items-center justify-end gap-2 border-t border-sky-100 pt-3 text-xs">
+              <div className="flex flex-wrap items-center gap-2 border-l border-sky-100 pl-3 [&_.ok-btn]:text-xs">
                 {phase === "buzzed" ? (
                   <button onClick={handleResume} className="ok-btn ok-btn-light ok-btn-sm">
                     False buzz · resume clock
