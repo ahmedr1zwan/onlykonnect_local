@@ -378,7 +378,7 @@ export function TileReveal({
         <div className="flex-shrink-0 flex justify-center py-1 px-4 md:px-8">
           <div className="ok-panel flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-3 py-2">
             {/* Countdown ring */}
-            <div className="relative h-16 w-16 flex-shrink-0">
+            <div className="relative h-[4.5rem] w-[4.5rem] flex-shrink-0">
               <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90">
                 <circle cx="60" cy="60" r={RING_R} fill="none" stroke="#e0f2fe" strokeWidth="12" />
                 <circle
@@ -394,14 +394,14 @@ export function TileReveal({
                   style={{ transition: `stroke-dashoffset ${TICK_MS}ms linear, stroke 300ms ease` }}
                 />
               </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <div className="absolute inset-[18%] flex flex-col items-center justify-center overflow-hidden">
                 <span
-                  className={`text-xl font-black tabular-nums leading-none ${phase !== "result" && fraction <= 0.25 ? "text-red-500" : "text-slate-800"}`}
+                  className={`text-lg font-black tabular-nums leading-none ${phase !== "result" && fraction <= 0.25 ? "text-red-500" : "text-slate-800"}`}
                 >
                   {formatTime(seconds)}
                 </span>
-                <span className="text-[0.5rem] font-bold uppercase tracking-[0.15em] text-slate-400">
-                  {isRunning ? "seconds" : phase === "result" ? "done" : "paused"}
+                <span className="mt-0.5 text-[0.5rem] font-bold uppercase leading-none tracking-wide text-slate-400">
+                  {isRunning ? "sec" : phase === "result" ? "done" : "paused"}
                 </span>
               </div>
             </div>
