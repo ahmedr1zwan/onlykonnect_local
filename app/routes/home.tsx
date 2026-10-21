@@ -104,45 +104,49 @@ export default function Home() {
 
   return (
   <>
-    <div className="relative flex flex-col items-center justify-center h-screen gap-4 overflow-hidden">
-      {/* Fractal Background */}
-      <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
-        <OnlyConnectFractal className="w-full h-full max-w-4xl max-h-4xl animate-[spin_40s_linear_infinite]" />
-      </div>
-      
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center gap-4">
-        <h1 className="text-4xl font-bold">OnlyKonnect</h1>
-        <p className="text-lg">Welcome to OnlyKonnect</p>
-        <div className="flex flex-col gap-2 items-center">
-        {hasGameInProgress ? (
-          <>
-            <button
-              onClick={handleResumeGame}
-              className="text-blue-500 hover:underline bg-transparent border-none cursor-pointer"
-            >
-              Resume Game
-            </button>
-            <button
-              onClick={handleNewGame}
-              className="text-blue-500 hover:underline bg-transparent border-none cursor-pointer"
-            >
-              New Game
-            </button>
-          </>
-        ) : (
-          <button
-            onClick={handleNewGame}
-            className="text-blue-500 hover:underline bg-transparent border-none cursor-pointer"
-          >
-            Start
-          </button>
-        )}
-        <Link to="/about" className="text-blue-500 hover:underline">About</Link>    
-        <Link to="/game-creator" className="text-blue-500 hover:underline">Game Creator</Link>
+    <main className="ok-page flex h-screen flex-col items-center justify-center overflow-hidden px-4">
+      <div className="ok-floor" />
+
+      {/* Tilted, slowly turning fractal disc behind the title */}
+      <div className="pointer-events-none absolute inset-x-0 top-[38%] flex justify-center opacity-40">
+        <div className="ok-disc">
+          <OnlyConnectFractal className="h-[min(90vw,620px)] w-[min(90vw,620px)]" />
         </div>
       </div>
-    </div>
+
+      <div className="relative z-10 flex flex-col items-center text-center">
+        <p className="ok-kicker">Welcome to</p>
+        <h1 className="ok-title-3d mt-3 whitespace-nowrap text-[clamp(2.25rem,10vw,5.5rem)] leading-none">
+          OnlyKonnect
+        </h1>
+        <div className="ok-rule mt-6 w-72 max-w-[70vw]" />
+
+        <nav className="mt-10 flex w-64 flex-col gap-4">
+          {hasGameInProgress ? (
+            <>
+              <button onClick={handleResumeGame} className="ok-btn w-full text-lg">
+                Resume Game
+              </button>
+              <button onClick={handleNewGame} className="ok-btn ok-btn-light w-full text-lg">
+                New Game
+              </button>
+            </>
+          ) : (
+            <button onClick={handleNewGame} className="ok-btn w-full text-lg">
+              Start
+            </button>
+          )}
+          <div className="grid grid-cols-2 gap-3">
+            <Link to="/game-creator" className="ok-btn ok-btn-light ok-btn-sm">
+              Creator
+            </Link>
+            <Link to="/about" className="ok-btn ok-btn-light ok-btn-sm">
+              About
+            </Link>
+          </div>
+        </nav>
+      </div>
+    </main>
     {showIntro && (
       <GameIntro onComplete={handleStartGame} sfxVolume={sfxVolume} />
     )}

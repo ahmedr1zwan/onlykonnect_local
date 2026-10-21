@@ -400,42 +400,45 @@ export default function GameCreator() {
   };
 
   return (
-    <div className="min-h-screen bg-white p-8">
+    <div className="ok-page p-8 pt-20">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-black/80">Game Creator</h1>
-          <Link to="/" className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+          <div>
+            <p className="ok-kicker">Build your puzzles</p>
+            <h1 className="ok-title-3d mt-2 text-3xl md:text-4xl">Game Creator</h1>
+          </div>
+          <Link to="/" className="ok-btn ok-btn-light ok-btn-sm">
             Back to Home
           </Link>
         </div>
 
         {/* Compact Settings Bar */}
-        <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-3">
+        <div className="ok-panel mb-8 p-4">
           <div className="grid grid-cols-2 md:grid-cols-7 gap-4">
             {/* Team Names - Compact */}
             <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700">Team 1</label>
+              <label className="ok-label">Team 1</label>
               <input
                 type="text"
                 value={teamNames.team1}
                 onChange={(e) => handleTeamNameChange("team1", e.target.value)}
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
+                className="ok-input py-1.5 text-sm"
                 placeholder="Team 1"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700">Team 2</label>
+              <label className="ok-label">Team 2</label>
               <input
                 type="text"
                 value={teamNames.team2}
                 onChange={(e) => handleTeamNameChange("team2", e.target.value)}
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
+                className="ok-input py-1.5 text-sm"
                 placeholder="Team 2"
               />
             </div>
             {/* Timer Settings - Compact */}
             <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700">
+              <label className="ok-label">
                 Guessing Time: {timerSettings.defaultGuessingTime >= 60
                   ? `${Math.floor(timerSettings.defaultGuessingTime / 60)}:${String(timerSettings.defaultGuessingTime % 60).padStart(2, '0')}`
                   : `${timerSettings.defaultGuessingTime}s`}
@@ -447,11 +450,11 @@ export default function GameCreator() {
                 step="10"
                 value={timerSettings.defaultGuessingTime}
                 onChange={(e) => handleTimerSettingsChange("defaultGuessingTime", parseInt(e.target.value))}
-                className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                className="ok-range mt-2"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700">
+              <label className="ok-label">
                 Steal Time: {timerSettings.defaultStealTime >= 60
                   ? `${Math.floor(timerSettings.defaultStealTime / 60)}:${String(timerSettings.defaultStealTime % 60).padStart(2, '0')}`
                   : `${timerSettings.defaultStealTime}s`}
@@ -463,40 +466,40 @@ export default function GameCreator() {
                 step="5"
                 value={timerSettings.defaultStealTime}
                 onChange={(e) => handleTimerSettingsChange("defaultStealTime", parseInt(e.target.value))}
-                className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                className="ok-range mt-2"
               />
             </div>
             {/* Starting Teams */}
             <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700">R1 First Team</label>
+              <label className="ok-label">R1 First Team</label>
               <select
                 value={startingTeams.round1}
                 onChange={(e) => handleStartingTeamChange("round1", e.target.value as "team1" | "team2")}
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
+                className="ok-input py-1.5 text-sm"
               >
                 <option value="team1">{teamNames.team1 ? teamNames.team1 : "Team 1"}</option>
                 <option value="team2">{teamNames.team2 ? teamNames.team2 : "Team 2"}</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700">R2 First Team</label>
+              <label className="ok-label">R2 First Team</label>
               <select
                 value={startingTeams.round2}
                 onChange={(e) => handleStartingTeamChange("round2", e.target.value as "team1" | "team2")}
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
+                className="ok-input py-1.5 text-sm"
               >
                 <option value="team1">{teamNames.team1 ? teamNames.team1 : "Team 1"}</option>
                 <option value="team2">{teamNames.team2 ? teamNames.team2 : "Team 2"}</option>
               </select>
             </div>
             <div>
-              <span className="block text-xs font-medium mb-1 text-gray-700">Opening</span>
-              <label className="flex h-[34px] items-center gap-2 rounded border border-gray-300 bg-white px-2 text-sm text-gray-800">
+              <span className="ok-label">Opening</span>
+              <label className="ok-input flex h-[34px] items-center gap-2 py-0 text-sm">
                 <input
                   type="checkbox"
                   checked={skipIntro}
                   onChange={(e) => handleSkipIntroChange(e.target.checked)}
-                  className="h-4 w-4 accent-blue-600"
+                  className="h-4 w-4 accent-sky-500"
                 />
                 <span>Skip intro</span>
               </label>
@@ -504,10 +507,10 @@ export default function GameCreator() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           {/* Tile Selection */}
           <div>
-            <h2 className="text-xl font-semibold mb-4">Select Tile</h2>
+            <h2 className="ok-heading-3d text-xl mb-5">Select Tile</h2>
             <div className="grid grid-cols-2 gap-4">
               {Object.values(tileMap).map((tile, index) => {
                 const tileId = index + 1;
@@ -516,14 +519,14 @@ export default function GameCreator() {
                   <button
                     key={tileId}
                     onClick={() => handleTileSelect(tileId)}
-                    className={`p-4 border-2 rounded-lg transition-all ${selectedTile === tileId
-                        ? "border-blue-600 bg-blue-50"
-                        : "border-gray-300 hover:border-gray-400"
+                    className={`ok-tile p-4 cursor-pointer ${selectedTile === tileId
+                        ? "ring-4 ring-sky-300"
+                        : ""
                       }`}
                   >
                     <div className="flex flex-col items-center gap-2">
-                      <TileIcon className="w-12 h-12" />
-                      <span className="text-sm font-medium">{tile.symbol}</span>
+                      <TileIcon className="w-14 h-14 drop-shadow-[0_2px_3px_rgba(14,165,233,0.35)]" />
+                      <span className="text-xs font-bold uppercase tracking-[0.18em] text-sky-700/80">{tile.symbol}</span>
                     </div>
                   </button>
                 );
@@ -539,33 +542,33 @@ export default function GameCreator() {
                 <div className="sticky top-4 z-10 mb-4 flex justify-end">
                   <button
                     onClick={handleSave}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-lg transition-colors"
+                    className="ok-btn"
                   >
-                    💾 Save Puzzle
+                    Save Puzzle
                   </button>
                 </div>
 
                 <div className="space-y-6">
-                  <h2 className="text-xl font-semibold">Edit Puzzle for {tileMap[selectedTile].symbol}</h2>
+                  <h2 className="ok-heading-3d text-xl">Edit Puzzle: {tileMap[selectedTile].symbol}</h2>
 
                   {/* Round 1: Connections */}
-                  <div className="border-2 border-gray-300 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold mb-3">Round 1: Connections</h3>
+                  <div className="ok-panel p-5">
+                    <h3 className="ok-kicker text-sm mb-4">Round 1: Connections</h3>
                     <div className="space-y-3 mb-3">
                       {currentPuzzle.round1.hints.map((hint, index) => {
                         const hintType = currentPuzzle.round1.hintTypes?.[index] || "text";
                         const hintFile = currentPuzzle.round1.hintFiles?.[index] || null;
 
                         return (
-                          <div key={index} className="border border-gray-200 rounded p-3">
+                          <div key={index} className="ok-inset p-3">
                             <div className="flex items-center justify-between mb-2">
-                              <label className="block text-sm font-medium">
+                              <label className="ok-label mb-0">
                                 Hint {index + 1}
                               </label>
                               <select
                                 value={hintType}
                                 onChange={(e) => handleHintTypeChange(1, index, e.target.value as "text" | "image" | "audio")}
-                                className="px-2 py-1 text-xs border border-gray-300 rounded"
+                                className="ok-input w-auto px-2 py-1 text-xs"
                               >
                                 <option value="text">Text</option>
                                 <option value="image">Image</option>
@@ -577,7 +580,7 @@ export default function GameCreator() {
                                 type="text"
                                 value={hint}
                                 onChange={(e) => handleRound1HintChange(index, e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                className="ok-input"
                                 placeholder={`Enter hint ${index + 1}`}
                               />
                             ) : currentPuzzle.round1.hintTypes[index] === "image" ? (
@@ -589,13 +592,13 @@ export default function GameCreator() {
                                     const file = e.target.files?.[0];
                                     if (file) handleFileUpload(1, index, file, "image");
                                   }}
-                                  className="w-full text-sm"
+                                  className="ok-input"
                                 />
                                 {hintFile && (
                                   <img
                                     src={hintFile}
                                     alt={`Hint ${index + 1}`}
-                                    className="max-w-full h-32 object-contain border border-gray-300 rounded"
+                                    className="max-w-full h-32 object-contain rounded-lg border border-sky-100 bg-white"
                                   />
                                 )}
                               </div>
@@ -608,7 +611,7 @@ export default function GameCreator() {
                                     const file = e.target.files?.[0];
                                     if (file) handleFileUpload(1, index, file, "audio");
                                   }}
-                                  className="w-full text-sm"
+                                  className="ok-input"
                                 />
                                 {hintFile && (
                                   <audio
@@ -624,7 +627,7 @@ export default function GameCreator() {
                       })}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">
+                      <label className="ok-label mt-4">
                         Puzzle Name (Connection)
                       </label>
                       <input
@@ -636,30 +639,30 @@ export default function GameCreator() {
                             round1: { ...currentPuzzle.round1, puzzleName: e.target.value },
                           })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                        className="ok-input"
                         placeholder="e.g., Things that are red"
                       />
                     </div>
                   </div>
 
                   {/* Round 2: Sequences */}
-                  <div className="border-2 border-gray-300 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold mb-3">Round 2: Sequences</h3>
+                  <div className="ok-panel p-5">
+                    <h3 className="ok-kicker text-sm mb-4">Round 2: Sequences</h3>
                     <div className="space-y-3 mb-3">
                       {currentPuzzle.round2.hints.map((hint, index) => {
                         const hintType = currentPuzzle.round2.hintTypes?.[index] || "text";
                         const hintFile = currentPuzzle.round2.hintFiles?.[index] || null;
 
                         return (
-                          <div key={index} className="border border-gray-200 rounded p-3">
+                          <div key={index} className="ok-inset p-3">
                             <div className="flex items-center justify-between mb-2">
-                              <label className="block text-sm font-medium">
+                              <label className="ok-label mb-0">
                                 Hint {index + 1}
                               </label>
                               <select
                                 value={hintType}
                                 onChange={(e) => handleHintTypeChange(2, index, e.target.value as "text" | "image" | "audio")}
-                                className="px-2 py-1 text-xs border border-gray-300 rounded"
+                                className="ok-input w-auto px-2 py-1 text-xs"
                               >
                                 <option value="text">Text</option>
                                 <option value="image">Image</option>
@@ -671,7 +674,7 @@ export default function GameCreator() {
                                 type="text"
                                 value={hint}
                                 onChange={(e) => handleRound2HintChange(index, e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                className="ok-input"
                                 placeholder={`Enter hint ${index + 1}`}
                               />
                             ) : hintType === "image" ? (
@@ -683,13 +686,13 @@ export default function GameCreator() {
                                     const file = e.target.files?.[0];
                                     if (file) handleFileUpload(2, index, file, "image");
                                   }}
-                                  className="w-full text-sm"
+                                  className="ok-input"
                                 />
                                 {hintFile && (
                                   <img
                                     src={hintFile}
                                     alt={`Hint ${index + 1}`}
-                                    className="max-w-full h-32 object-contain border border-gray-300 rounded"
+                                    className="max-w-full h-32 object-contain rounded-lg border border-sky-100 bg-white"
                                   />
                                 )}
                               </div>
@@ -702,7 +705,7 @@ export default function GameCreator() {
                                     const file = e.target.files?.[0];
                                     if (file) handleFileUpload(2, index, file, "audio");
                                   }}
-                                  className="w-full text-sm"
+                                  className="ok-input"
                                 />
                                 {hintFile && (
                                   <audio
@@ -718,7 +721,7 @@ export default function GameCreator() {
                       })}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">
+                      <label className="ok-label mt-4">
                         Sequence Name
                       </label>
                       <input
@@ -730,7 +733,7 @@ export default function GameCreator() {
                             round2: { ...currentPuzzle.round2, sequenceName: e.target.value },
                           })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                        className="ok-input"
                         placeholder="e.g., Fibonacci sequence"
                       />
                     </div>
@@ -738,7 +741,7 @@ export default function GameCreator() {
                 </div>
               </>
             ) : (
-              <div className="text-gray-500 text-center py-12">
+              <div className="ok-panel text-slate-500 text-center py-16">
                 Select a tile to edit its puzzle
               </div>
             )}

@@ -268,16 +268,13 @@ export function TileReveal({
 
   return (
     <div
-      className={`fixed inset-0 bg-black z-50 transition-opacity duration-300 ${isVisible ? "opacity-100" : "opacity-0"
+      className={`fixed inset-0 bg-sky-50 z-50 transition-opacity duration-300 ${isVisible ? "opacity-100" : "opacity-0"
         }`}
       onClick={onClose}
     >
       <div
-        className="h-full w-full bg-gradient-to-br from-blue-200 via-blue-300 to-blue-400 flex flex-col relative overflow-hidden"
+        className="ok-page h-full w-full flex flex-col relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
-        style={{
-          background: 'linear-gradient(to bottom right, #c6dcff, #a6c6ff, #83a9ff)',
-        }}
       >
         {/* Done Button - Top Right */}
         <button
@@ -290,41 +287,39 @@ export function TileReveal({
             }
             onClose();
           }}
-          className="absolute top-4 right-4 px-6 py-2 bg-blue-600/80 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 z-10 font-semibold"
+          className="ok-btn ok-btn-light absolute top-4 right-4 z-10"
           aria-label="Done"
         >
           Done
         </button>
 
         {/* Top Section - Hieroglyphic Name */}
-        <div className="flex-shrink-0 flex flex-col items-center justify-center pt-8 pb-2">
-          <h1 className="text-blue-900 text-3xl font-bold tracking-wider">
+        <div className="flex-shrink-0 flex flex-col items-center justify-center pt-6 pb-3">
+          <p className="ok-kicker">{round === 1 ? "Connections" : "Sequences"}</p>
+          <h1 className="ok-title-3d mt-2 text-3xl md:text-4xl">
             {tile.symbol}
           </h1>
         </div>
 
-        {/* Divider */}
-        <div className="flex-shrink-0 h-px bg-gradient-to-r from-transparent via-blue-900/20 to-transparent mx-8" />
-
         {/* Timer - Just Above Hints */}
         <div className="flex-shrink-0 flex justify-center py-2 px-8">
-          <div className="bg-white/80 backdrop-blur-sm border-2 border-blue-500/40 rounded-lg px-6 py-4 flex flex-col items-center gap-3 w-full max-w-2xl shadow-lg">
+          <div className="ok-panel px-6 py-4 flex flex-col items-center gap-3 w-full max-w-2xl">
             {/* Timer Progress Bar */}
             <div className="w-full">
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <span className={`text-2xl font-bold ${time <= 10 ? 'text-red-600' : 'text-blue-900'
+                  <span className={`text-3xl font-black tabular-nums ${time <= 10 ? 'text-red-500' : 'text-sky-600'
                     }`}>
                     {formatTime(time)}
                   </span>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-blue-900/60">
+                  <p className="ok-label mb-0">
                     Team {activeTeamName} {timerMode === "steal" ? "steal" : "guess"}
                   </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
                     onClick={handlePauseResume}
-                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-semibold transition-colors"
+                    className="ok-btn ok-btn-sm min-w-[2.75rem]"
                     title={isTimerActive ? 'Pause timer' : 'Resume timer'}
                   >
                     {isTimerActive ? '⏸' : '▶'}
@@ -333,7 +328,7 @@ export function TileReveal({
                     <button
                       onClick={handleWrongAnswer}
                       disabled={timerMode === "steal"}
-                      className="px-3 py-1.5 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded text-sm font-semibold transition-colors"
+                      className="ok-btn ok-btn-red ok-btn-sm"
                       title={timerMode === "steal" ? "No further steal after steal attempt" : `Wrong answer - Team ${opposingTeamName} steals`}
                     >
                       Wrong
@@ -341,7 +336,7 @@ export function TileReveal({
                   )}
                   <button
                     onClick={handleReset}
-                    className="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm font-semibold transition-colors"
+                    className="ok-btn ok-btn-light ok-btn-sm min-w-[2.75rem]"
                     title="Reset to 40s"
                   >
                     ↻
@@ -350,10 +345,10 @@ export function TileReveal({
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full h-4 bg-blue-200 rounded-full overflow-hidden">
+              <div className="ok-inset w-full h-4 rounded-full overflow-hidden p-0">
                 <div
-                  className={`h-full ${isTimerActive ? 'transition-all duration-1000 ease-linear' : 'transition-none'} ${time <= timerMax / 4 ? 'bg-red-500' : time <= timerMax / 2 ? 'bg-yellow-500' : 'bg-blue-500'
-                    }`}
+                  className={`h-full ${isTimerActive ? 'transition-all duration-1000 ease-linear' : 'transition-none'} ${time <= timerMax / 4 ? 'bg-gradient-to-b from-red-300 to-red-500' : time <= timerMax / 2 ? 'bg-gradient-to-b from-amber-200 to-amber-400' : 'bg-gradient-to-b from-sky-300 to-sky-500'
+                    } rounded-full`}
                   style={{
                     width: `${(time / timerMax) * 100}%`
                   }}
@@ -363,8 +358,8 @@ export function TileReveal({
 
             {/* Steal Time Slider - Show when paused */}
             {!isTimerActive && time > 0 && timerMode === "guess" && (
-              <div className="flex items-center gap-3 pt-2 border-t border-gray-600/50 w-full">
-                <span className="text-blue-900/70 text-sm">
+              <div className="flex items-center gap-3 pt-3 border-t border-sky-100 w-full">
+                <span className="text-slate-600 text-sm">
                   If Team {activeTeamName} is wrong, Team {opposingTeamName} gets:
                 </span>
                 <input
@@ -373,9 +368,9 @@ export function TileReveal({
                   max="90"
                   value={stealTime}
                   onChange={(e) => setStealTime(Number(e.target.value))}
-                  className="flex-1 h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                  className="ok-range flex-1"
                 />
-                <span className="text-blue-900 text-sm font-semibold min-w-[3rem] text-center">
+                <span className="text-sky-700 text-sm font-bold tabular-nums min-w-[3rem] text-center">
                   {formatTime(stealTime)}
                 </span>
               </div>
@@ -383,8 +378,8 @@ export function TileReveal({
 
             {/* Steal Controls - Show when timer reaches 0 */}
             {showStealControls && (
-              <div className="flex items-center gap-3 pt-2 border-t border-gray-600/50 w-full">
-                <span className="text-blue-900/70 text-sm">
+              <div className="flex items-center gap-3 pt-3 border-t border-sky-100 w-full">
+                <span className="text-slate-600 text-sm">
                   Team {opposingTeamName} steal time:
                 </span>
                 <input
@@ -393,14 +388,14 @@ export function TileReveal({
                   max="90"
                   value={stealTime}
                   onChange={(e) => setStealTime(Number(e.target.value))}
-                  className="flex-1 h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                  className="ok-range flex-1"
                 />
-                <span className="text-blue-900 text-sm font-semibold min-w-[3rem] text-center">
+                <span className="text-sky-700 text-sm font-bold tabular-nums min-w-[3rem] text-center">
                   {formatTime(stealTime)}
                 </span>
                 <button
                   onClick={handleStartSteal}
-                  className="px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white rounded text-sm font-semibold transition-colors"
+                  className="ok-btn ok-btn-amber ok-btn-sm"
                 >
                   Start Steal
                 </button>
@@ -411,7 +406,7 @@ export function TileReveal({
 
         {/* Middle Section - Grid of Hints (2x2 for both rounds) */}
         <div className="flex-1 flex items-center justify-center min-h-0 py-2">
-          <div className="grid grid-cols-2 gap-4 max-w-5xl w-full h-full px-8 auto-rows-fr">
+          <div className="grid grid-cols-2 gap-6 max-w-5xl w-full h-full px-8 py-2 auto-rows-fr">
             {displayHints.map((hint, index) => {
               const isRevealed = revealedHintIndices.has(index);
               const isEmpty = !hint || hint.trim() === "";
@@ -423,21 +418,28 @@ export function TileReveal({
                 <div
                   key={index}
                   onClick={() => isClickable && handleHintClick(index)}
-                  className={`bg-blue-400/30 border-2 rounded-lg p-6 flex items-center justify-center transition-all overflow-hidden min-h-0 ${isClickable
-                    ? 'border-blue-300/90 cursor-pointer hover:border-blue-400 hover:bg-blue-300/50'
+                  className={`ok-flip min-h-0 ${isRevealed ? 'is-flipped' : ''} ${isClickable
+                    ? 'cursor-pointer'
                     : isRevealed
-                      ? 'border-blue-300/60'
-                      : 'border-blue-300/30 opacity-50 cursor-not-allowed'
+                      ? ''
+                      : 'opacity-50 cursor-not-allowed'
                     }`}
                 >
-                  {isRevealed ? (
-                    <div className="w-full h-full flex items-center justify-center overflow-hidden min-h-0">
-                      {hintType === "image" && hintFile ? (
+                  <div className="ok-flip-inner">
+                    {/* Face-down side */}
+                    <div className={`ok-flip-face ok-flip-back transition-transform ${isClickable ? 'hover:-translate-y-1' : ''}`}>
+                      <p className="ok-kicker text-sky-600/80">
+                        {round === 2 && index === 3 ? "Final hint" : isClickable ? "Click to reveal" : `Hint ${index + 1}`}
+                      </p>
+                    </div>
+
+                    {/* Revealed side */}
+                    <div className="ok-flip-face ok-flip-front">
+                      {isRevealed && (hintType === "image" && hintFile ? (
                         <img
                           src={hintFile}
                           alt={`Hint ${index + 1}`}
-                          className="max-w-full max-h-full w-auto h-auto object-contain"
-                          style={{ maxHeight: 'calc(100% - 1rem)', maxWidth: 'calc(100% - 1rem)' }}
+                          className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg"
                         />
                       ) : hintType === "audio" && hintFile ? (
                         <audio
@@ -446,28 +448,23 @@ export function TileReveal({
                           className="w-full max-w-md"
                         />
                       ) : (
-                        <p className="text-blue-900 text-xl text-center">
+                        <p className="text-slate-800 text-xl md:text-2xl font-semibold text-center">
                           {isEmpty ? `Hint ${index + 1}` : hint}
                         </p>
-                      )}
+                      ))}
                     </div>
-                  ) : (
-                    <p className="text-blue-900/40 text-xl text-center">
-                      {round === 2 && index === 3 ? "Final hint" : "Click to reveal"}
-                    </p>
-                  )}
+                  </div>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="flex-shrink-0 h-px bg-gradient-to-r from-transparent via-blue-900/20 to-transparent mx-8" />
+        <div className="ok-rule flex-shrink-0 mx-8" />
 
         {/* Bottom Section - Round Name or Puzzle/Sequence Name with Reveal Answer Button */}
         <div className="flex-shrink-0 flex flex-col items-center justify-center py-6 space-y-3">
-          <p className="text-blue-900/90 text-xl font-semibold tracking-wider">
+          <p className={isAnswerRevealed ? "ok-title-3d text-2xl md:text-3xl text-center" : "ok-heading-3d text-xl"}>
             {bottomText}
           </p>
           {isAllHintsRevealed && !isAnswerRevealed && (
@@ -487,7 +484,7 @@ export function TileReveal({
                 }
                 setIsAnswerRevealed(true);
               }}
-              className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-base font-semibold transition-colors"
+              className="ok-btn ok-btn-green"
             >
               Reveal Answer
             </button>

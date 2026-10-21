@@ -36,13 +36,13 @@ export function GlobalMuteButton() {
   return (
     <button
       onClick={toggleMute}
-      className="fixed top-4 left-4 z-[9999] p-2 bg-blue-500/80 hover:bg-blue-600/90 rounded-lg transition-colors shadow-lg"
+      className="ok-btn ok-btn-light ok-btn-icon fixed top-4 left-4 z-[9999]"
       aria-label={isMuted ? "Unmute sound effects" : "Mute sound effects"}
       title={isMuted ? "Unmute sound effects" : "Mute sound effects"}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="h-6 w-6 text-white"
+        className="h-6 w-6 text-sky-600"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"

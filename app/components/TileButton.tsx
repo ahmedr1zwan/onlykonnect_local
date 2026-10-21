@@ -24,15 +24,21 @@ export function TileButton({
 
   return (
     <button
-      className={`
-        aspect-[5/4] bg-gradient-to-br from-blue-950 to-blue-900 
-        border-2 rounded-lg transition-all duration-300 group relative overflow-hidden
-        ${isSelected 
-          ? 'border-blue-400/60 opacity-50 cursor-not-allowed' 
-          : 'border-blue-400/30 hover:border-blue-400/60 hover:shadow-lg hover:shadow-blue-500/20'
-        }
-        ${disabled && !isSelected ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+      className={`ok-tile aspect-[5/4] group
+        ${isSelected || disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
       `}
+      onMouseMove={(e) => {
+        if (disabled || isSelected) return;
+        // Tilt the slab toward the cursor and move the glare with it
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top) / rect.height;
+        const style = e.currentTarget.style;
+        style.setProperty("--ry", `${(x - 0.5) * 14}deg`);
+        style.setProperty("--rx", `${(0.5 - y) * 12}deg`);
+        style.setProperty("--gx", `${x * 100}%`);
+        style.setProperty("--gy", `${y * 100}%`);
+      }}
       onMouseEnter={() => {
         if (!disabled && !isSelected) {
           setIsHovered(true);
@@ -47,7 +53,9 @@ export function TileButton({
           }
         }
       }}
-      onMouseLeave={() => {
+      onMouseLeave={(e) => {
+        e.currentTarget.style.setProperty("--rx", "0deg");
+        e.currentTarget.style.setProperty("--ry", "0deg");
         setIsHovered(false);
         hasPlayedSoundRef.current = false;
         if (hoverSoundRef.current) {
@@ -58,18 +66,17 @@ export function TileButton({
       disabled={disabled || isSelected}
       aria-label={symbol}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-400/0 to-blue-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      
+      <div className="ok-tile-glare" />
+      <div className="absolute inset-[6%] rounded-xl border border-sky-200/70 pointer-events-none" />
+
       <div className="relative h-full flex items-center justify-center">
-        <Icon className={`w-32 h-32 md:w-40 md:h-40 lg:w-40 lg:h-40 transition-transform duration-300 ${
+        <Icon className={`w-28 h-28 md:w-36 md:h-36 lg:w-40 lg:h-40 drop-shadow-[0_3px_4px_rgba(14,165,233,0.35)] transition-transform duration-300 ${
           isHovered && !disabled && !isSelected ? 'scale-110' : 'scale-100'
         }`} />
       </div>
       
       <div className="absolute bottom-4 left-0 right-0 text-center">
-        <span className={`text-base md:text-lg tracking-wider ${
-          isSelected ? 'text-blue-200/40' : 'text-blue-200/60'
-        }`}>
+        <span className="text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-sky-700/70">
           {symbol}
         </span>
       </div>

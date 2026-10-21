@@ -19,7 +19,7 @@ interface TileGridProps {
 
 export function TileGrid({ onTileClick, selectedTileIds, disabled = false, sfxVolume = 0.7 }: TileGridProps) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-10 md:gap-16 w-full max-w-6xl mx-auto px-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12 w-full max-w-6xl mx-auto px-4">
       {tiles.map((tile) => {
         const isSelected = selectedTileIds.includes(tile.id);
         

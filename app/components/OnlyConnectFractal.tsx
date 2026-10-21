@@ -36,12 +36,12 @@ const ringConfigs = [
 ];
 
 const colors = [
-  "#e5f0ff",
-  "#c6dcff",
-  "#a6c6ff",
-  "#83a9ff",
-  "#628bff",
-  "#416dda",
+  "#f0f9ff",
+  "#e0f2fe",
+  "#bae6fd",
+  "#7dd3fc",
+  "#38bdf8",
+  "#0ea5e9",
 ];
 
 export const OnlyConnectFractal: React.FC<{

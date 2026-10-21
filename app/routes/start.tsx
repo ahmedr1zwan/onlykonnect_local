@@ -213,16 +213,30 @@ export default function Start() {
   const tilesSelectedThisRound = currentRoundTiles.length;
 
   return (
-    <div className="h-screen bg-gradient-to-br from-blue-50 via-blue-100/50 to-blue-50 flex flex-col items-center justify-center p-4 overflow-hidden">
+    <div className="ok-page h-screen flex flex-col items-center justify-center p-4 overflow-hidden">
       <div className="max-w-6xl w-full h-full flex flex-col">
-        {/* Top Left Controls */}
-        <div className="flex-shrink-0 mb-2">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-          >
+        {/* Top bar: back link + host status (left clear for the global sound controls) */}
+        <div className="flex-shrink-0 flex flex-wrap items-center justify-end gap-3 pl-28">
+          <div className="ok-panel flex items-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-wider text-slate-600 sm:gap-4">
+            <span className="text-sky-600">Round {currentRound}</span>
+            <span className="h-4 w-px bg-sky-200" />
+            <span>
+              Team {teamNames[currentTeam] || (currentTeam === "team1" ? "1" : "2")}'s turn
+            </span>
+            <span className="h-4 w-px bg-sky-200" />
+            <span>{6 - tilesSelectedThisRound}/6 left</span>
+            {currentRound === 1 && tilesSelectedThisRound === 6 && (
+              <button
+                onClick={handleNextRound}
+                className="ok-btn ok-btn-green ok-btn-sm ml-1"
+              >
+                Start Round 2
+              </button>
+            )}
+          </div>
+          <Link to="/" className="ok-btn ok-btn-light ok-btn-sm">
             <svg
-              className="w-6 h-6"
+              className="w-4 h-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -230,43 +244,21 @@ export default function Start() {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
+                strokeWidth={2.5}
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-            <span className="text-sm font-medium">Back to Home</span>
+            Home
           </Link>
         </div>
 
-        {/* Host Controls Panel - Smaller */}
-        <div className="flex-shrink-0 bg-white/90 rounded-lg p-2 mb-4 border border-blue-200/50 shadow-md">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <p className="text-xs font-semibold text-blue-900">Round {currentRound}</p>
-              <p className="text-xs text-blue-900">
-                Team {teamNames[currentTeam] || (currentTeam === "team1" ? "1" : "2")}'s Turn
-              </p>
-              <p className="text-xs text-blue-900">
-                Remaining: {6 - tilesSelectedThisRound}/6
-              </p>
-            </div>
-            {currentRound === 1 && tilesSelectedThisRound === 6 && (
-              <button
-                onClick={handleNextRound}
-                className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 transition shadow-sm"
-              >
-                Start Round 2
-              </button>
-            )}
-          </div>
-        </div>
-
         {/* Game Title */}
-        <div className="flex-shrink-0 text-center mt-8">
-          <h1 className="text-black/80 text-xl md:text-2xl lg:text-3xl font-bold tracking-wider">
-            Round {currentRound}: {currentRound === 1 ? "Connections" : "Sequences"}
+        <div className="flex-shrink-0 text-center mt-6">
+          <p className="ok-kicker">Round {currentRound}</p>
+          <h1 className="ok-title-3d mt-2 text-2xl md:text-4xl lg:text-5xl">
+            {currentRound === 1 ? "Connections" : "Sequences"}
           </h1>
-          <div className="h-px bg-gradient-to-r from-transparent via-black/20 to-transparent opacity-30" />
+          <div className="ok-rule mx-auto mt-4 w-72 max-w-[70vw]" />
         </div>
 
         {/* Tile Grid - Takes remaining space */}
@@ -281,8 +273,8 @@ export default function Start() {
 
         {/* Bottom Text - Smaller */}
         <div className="flex-shrink-0 text-center">
-          <p className="text-black/60 tracking-wider text-xs">
-            SELECT A HIEROGLYPH
+          <p className="ok-kicker text-sky-600/70">
+            Select a hieroglyph
           </p>
         </div>
 
