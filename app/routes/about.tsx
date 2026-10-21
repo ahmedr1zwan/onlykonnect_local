@@ -1,4 +1,12 @@
 import { Link } from "react-router";
+import type { Route } from "./+types/about";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "OnlyKonnect - How to Play" },
+    { name: "description", content: "How OnlyKonnect works: the Connections and Sequences rounds, buzzing in, steals and scoring." },
+  ];
+}
 
 export default function About() {
   return (

@@ -51,8 +51,8 @@ interface TeamNames {
 
 export function meta({ }: Route.MetaArgs) {
   return [
-    { title: "Only Connect - Game Creator" },
-    { name: "description", content: "Create puzzles and hints for Only Connect game" },
+    { title: "OnlyKonnect - Game Creator" },
+    { name: "description", content: "Build your own OnlyKonnect puzzles with text, image and audio clues, and set timers and points." },
   ];
 }
 

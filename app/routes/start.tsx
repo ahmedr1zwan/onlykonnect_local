@@ -56,7 +56,7 @@ interface TeamNames {
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "OnlyKonnect - Start" },
-    { name: "description", content: "Select a category to begin the Only Connect game" },
+    { name: "description", content: "Pick a hieroglyph to play the next OnlyKonnect puzzle." },
   ];
 }
 

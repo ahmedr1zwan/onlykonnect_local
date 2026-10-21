@@ -20,10 +20,20 @@ interface GameState {
   }>;
 }
 
+const DESCRIPTION =
+  "Host your own Only Connect-style quiz night: build connection and sequence puzzles, reveal clues on hieroglyph tiles, and run the clock and scores for two teams.";
+
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "OnlyKonnect" },
-    { name: "description", content: "Welcome to React Router!" },
+    { name: "description", content: DESCRIPTION },
+    // Link previews when the URL is shared
+    { property: "og:title", content: "OnlyKonnect" },
+    { property: "og:description", content: DESCRIPTION },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "twitter:title", content: "OnlyKonnect" },
+    { name: "twitter:description", content: DESCRIPTION },
   ];
 }
 
