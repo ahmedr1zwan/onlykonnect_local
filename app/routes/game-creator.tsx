@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Route } from "./+types/game-creator";
 import { Link } from "react-router";
+import { DEFAULT_POINTS, loadPointsSettings, savePointsSettings, type PointsSettings } from "../utils/pointsSettings";
 import { TwoReeds, Lion, TwistedFlax, HornedViper, Water, EyeOfHorus } from "../components/Hieroglyphs";
 
 const tileMap: Record<number, {
@@ -85,6 +86,7 @@ export default function GameCreator() {
     }
     return false;
   });
+  const [pointsSettings, setPointsSettings] = useState<PointsSettings>(DEFAULT_POINTS);
   // Score totals are hidden on the game board unless the host opts in
   const [showScores, setShowScores] = useState(() => {
     if (typeof window !== "undefined") {
@@ -94,6 +96,8 @@ export default function GameCreator() {
   });
 
   useEffect(() => {
+    setPointsSettings(loadPointsSettings());
+
     // Load team names from localStorage
     const storedTeamNames = localStorage.getItem(TEAM_NAMES_KEY);
     if (storedTeamNames) {
@@ -222,6 +226,18 @@ export default function GameCreator() {
     const updated = { ...timerSettings, [setting]: value };
     setTimerSettings(updated);
     localStorage.setItem(TIMER_SETTINGS_KEY, JSON.stringify(updated));
+  };
+
+  const handlePointsChange = (slot: number | "steal", value: string) => {
+    const points = Math.max(0, Math.min(99, parseInt(value, 10) || 0));
+    const updated: PointsSettings = slot === "steal"
+      ? { ...pointsSettings, stealPoints: points }
+      : {
+          ...pointsSettings,
+          cluePoints: pointsSettings.cluePoints.map((p, i) => (i === slot ? points : p)) as PointsSettings["cluePoints"],
+        };
+    setPointsSettings(updated);
+    savePointsSettings(updated);
   };
 
   const handleShowScoresChange = (enabled: boolean) => {
@@ -529,6 +545,47 @@ export default function GameCreator() {
                 <span>Show tally</span>
               </label>
             </div>
+          </div>
+
+          {/* Points per question */}
+          <div className="mt-4 flex flex-wrap items-end gap-x-4 gap-y-2 border-t border-sky-100 pt-4">
+            <div className="mr-2">
+              <span className="ok-label">Points</span>
+              <p className="text-xs text-slate-500">For a correct answer after…</p>
+            </div>
+            {pointsSettings.cluePoints.map((points, i) => (
+              <label key={i} className="w-20">
+                <span className="ok-label">{i + 1} clue{i === 0 ? "" : "s"}</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="99"
+                  value={points}
+                  onChange={(e) => handlePointsChange(i, e.target.value)}
+                  className="ok-input py-1.5 text-sm"
+                />
+              </label>
+            ))}
+            <label className="w-20">
+              <span className="ok-label">Steal</span>
+              <input
+                type="number"
+                min="0"
+                max="99"
+                value={pointsSettings.stealPoints}
+                onChange={(e) => handlePointsChange("steal", e.target.value)}
+                className="ok-input py-1.5 text-sm"
+              />
+            </label>
+            <button
+              onClick={() => {
+                setPointsSettings(DEFAULT_POINTS);
+                savePointsSettings(DEFAULT_POINTS);
+              }}
+              className="ok-btn ok-btn-light ok-btn-sm mb-0.5"
+            >
+              Reset 5·3·2·1
+            </button>
           </div>
         </div>
 

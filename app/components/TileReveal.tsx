@@ -1,14 +1,11 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import { TwoReeds, Lion, TwistedFlax, HornedViper, Water, EyeOfHorus } from "./Hieroglyphs";
 import { isMuted, registerAudio, unregisterAudio } from "../utils/audioManager";
+import { loadPointsSettings } from "../utils/pointsSettings";
 
 const TIMER_SETTINGS_KEY = "onlyconnect_timer_settings";
 const DEFAULT_TIMER_SETTINGS = { defaultGuessingTime: 40, defaultStealTime: 15 };
 const TICK_MS = 100;
-
-// Points for a correct answer, by how many clues were showing when the team buzzed
-const CLUE_POINTS = [5, 3, 2, 1];
-const STEAL_POINTS = 1;
 
 type Team = "team1" | "team2";
 
@@ -112,7 +109,9 @@ export function TileReveal({
   const [clockEpoch, setClockEpoch] = useState(0);
   // Bumped each time a running clock reaches zero
   const [timeUpCount, setTimeUpCount] = useState(0);
-  const [buzzPoints, setBuzzPoints] = useState(CLUE_POINTS[0]);
+  // Points for a correct answer (by clues showing at the buzz) and for a steal
+  const [{ cluePoints, stealPoints }] = useState(loadPointsSettings);
+  const [buzzClue, setBuzzClue] = useState(1);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [isAnswerRevealed, setIsAnswerRevealed] = useState(false);
   // Both rounds start with first hint revealed, host clicks to reveal more
@@ -219,11 +218,13 @@ export function TileReveal({
   }, [timeUpCount]);
 
   const revealedCount = revealedHintIndices.size;
-  const pointsNow = CLUE_POINTS[Math.min(revealedCount, CLUE_POINTS.length) - 1];
+  const clueNow = Math.min(revealedCount, cluePoints.length);
+  const pointsNow = cluePoints[clueNow - 1];
+  const buzzPoints = cluePoints[buzzClue - 1];
 
   const handleBuzz = () => {
     setIsRunning(false);
-    setBuzzPoints(pointsNow);
+    setBuzzClue(clueNow);
     setPhase("buzzed");
   };
 
@@ -235,7 +236,7 @@ export function TileReveal({
   const handleCorrect = () => {
     playSound("/sounds/solveClue.mp3");
     if (phase === "steal") {
-      finish({ team: otherTeam, points: STEAL_POINTS, label: `Team ${nameOf(otherTeam)} steals ${STEAL_POINTS} point` });
+      finish({ team: otherTeam, points: stealPoints, label: `Team ${nameOf(otherTeam)} steals ${stealPoints} point${stealPoints === 1 ? "" : "s"}` });
     } else {
       finish({ team: currentTeam, points: buzzPoints, label: `Team ${nameOf(currentTeam)} scores ${buzzPoints} point${buzzPoints === 1 ? "" : "s"}` });
     }
@@ -347,17 +348,6 @@ export function TileReveal({
       : (sequenceName || `Round 2 : Sequences`))
     : (round === 1 ? `Round 1 : Connections` : `Round 2 : Sequences`);
 
-  const status = {
-    guess: isRunning
-      ? `Clock running. Press Buzz when Team ${nameOf(currentTeam)} buzzes in.`
-      : "Clock paused.",
-    buzzed: `Team ${nameOf(currentTeam)} buzzed in. Were they right?`,
-    steal: isRunning
-      ? `Team ${nameOf(otherTeam)} can steal for ${STEAL_POINTS} point.`
-      : `Steal clock paused.`,
-    result: outcome?.label ?? "",
-  }[phase];
-
   return (
     <div
       className={`fixed inset-0 bg-sky-50 z-50 transition-opacity duration-300 ${isVisible ? "opacity-100" : "opacity-0"
@@ -426,12 +416,15 @@ export function TileReveal({
                 </span>
                 <span className="text-base font-black text-slate-800">Team {nameOf(activeTeam)}</span>
               </div>
-              <p className="mt-0.5 text-xs text-slate-600">{status}</p>
-              {(phase === "guess" || phase === "buzzed") && (
-                <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-sky-600">
+              {phase === "result" ? (
+                <p className="mt-0.5 text-xs text-slate-600">{outcome?.label}</p>
+              ) : (
+                <p className="mt-0.5 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-sky-600">
                   {phase === "buzzed"
-                    ? `Buzzed on clue ${CLUE_POINTS.indexOf(buzzPoints) + 1} · worth ${buzzPoints}`
-                    : `Clue ${revealedCount} showing · worth ${pointsNow}`}
+                    ? `Buzzed on clue ${buzzClue} · worth ${buzzPoints}`
+                    : phase === "steal"
+                      ? `Steal · worth ${stealPoints}`
+                      : `Clue ${revealedCount} showing · worth ${pointsNow}`}
                 </p>
               )}
             </div>
@@ -455,7 +448,7 @@ export function TileReveal({
               {(phase === "buzzed" || phase === "steal") && (
                 <>
                   <button onClick={handleCorrect} className="ok-btn ok-btn-green px-5 py-2.5">
-                    Correct · +{phase === "steal" ? STEAL_POINTS : buzzPoints} <Kbd>C</Kbd>
+                    Correct · +{phase === "steal" ? stealPoints : buzzPoints} <Kbd>C</Kbd>
                   </button>
                   <button onClick={handleWrong} className="ok-btn ok-btn-red px-5 py-2.5">
                     {phase === "steal" ? "Wrong" : `Wrong · Team ${nameOf(otherTeam)} steals`} <Kbd>W</Kbd>
