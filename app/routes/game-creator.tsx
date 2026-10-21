@@ -36,6 +36,7 @@ const TEAM_NAMES_KEY = "onlyconnect_team_names";
 const TIMER_SETTINGS_KEY = "onlyconnect_timer_settings";
 const STARTING_TEAMS_KEY = "onlyconnect_starting_teams";
 const SKIP_INTRO_KEY = "onlyconnect_skip_intro";
+const SHOW_SCORES_KEY = "onlyconnect_show_scores";
 
 interface StartingTeams {
   round1: "team1" | "team2";
@@ -81,6 +82,13 @@ export default function GameCreator() {
   const [skipIntro, setSkipIntro] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem(SKIP_INTRO_KEY) === "true";
+    }
+    return false;
+  });
+  // Score totals are hidden on the game board unless the host opts in
+  const [showScores, setShowScores] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem(SHOW_SCORES_KEY) === "true";
     }
     return false;
   });
@@ -214,6 +222,11 @@ export default function GameCreator() {
     const updated = { ...timerSettings, [setting]: value };
     setTimerSettings(updated);
     localStorage.setItem(TIMER_SETTINGS_KEY, JSON.stringify(updated));
+  };
+
+  const handleShowScoresChange = (enabled: boolean) => {
+    setShowScores(enabled);
+    localStorage.setItem(SHOW_SCORES_KEY, enabled.toString());
   };
 
   const handleSkipIntroChange = (enabled: boolean) => {
@@ -414,7 +427,7 @@ export default function GameCreator() {
 
         {/* Compact Settings Bar */}
         <div className="ok-panel mb-8 p-4">
-          <div className="grid grid-cols-2 md:grid-cols-7 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
             {/* Team Names - Compact */}
             <div>
               <label className="ok-label">Team 1</label>
@@ -502,6 +515,18 @@ export default function GameCreator() {
                   className="h-4 w-4 accent-sky-500"
                 />
                 <span>Skip intro</span>
+              </label>
+            </div>
+            <div>
+              <span className="ok-label">Scores</span>
+              <label className="ok-input flex h-[34px] items-center gap-2 py-0 text-sm">
+                <input
+                  type="checkbox"
+                  checked={showScores}
+                  onChange={(e) => handleShowScoresChange(e.target.checked)}
+                  className="h-4 w-4 accent-sky-500"
+                />
+                <span>Show tally</span>
               </label>
             </div>
           </div>

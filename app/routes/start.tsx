@@ -37,6 +37,7 @@ const GAME_STATE_KEY = "onlyconnect_game_state";
 const TEAM_NAMES_KEY = "onlyconnect_team_names";
 const SFX_VOLUME_KEY = "onlyconnect_sfx_volume";
 const STARTING_TEAMS_KEY = "onlyconnect_starting_teams";
+const SHOW_SCORES_KEY = "onlyconnect_show_scores";
 
 type Scores = Record<Team, number>;
 
@@ -64,6 +65,8 @@ export default function Start() {
   const [currentTeam, setCurrentTeam] = useState<Team>("team1");
   const [selectedTiles, setSelectedTiles] = useState<SelectedTile[]>([]);
   const [scores, setScores] = useState<Scores>({ team1: 0, team2: 0 });
+  // Totals are still tracked when hidden, so turning the tally on mid-game shows real scores
+  const [showScores, setShowScores] = useState(false);
   const [revealingTileId, setRevealingTileId] = useState<number | null>(null);
   const [showReveal, setShowReveal] = useState(false);
   const [puzzles, setPuzzles] = useState<Record<number, PuzzleData>>({});
@@ -84,6 +87,8 @@ export default function Start() {
     if (stored) {
       setPuzzles(JSON.parse(stored));
     }
+
+    setShowScores(localStorage.getItem(SHOW_SCORES_KEY) === "true");
 
     // Load team names from localStorage
     const storedTeamNames = localStorage.getItem(TEAM_NAMES_KEY);
@@ -282,25 +287,29 @@ export default function Start() {
                     {teamNames[team] || (team === "team1" ? "1" : "2")}
                   </p>
                 </div>
-                <span className="ok-heading-3d text-3xl tabular-nums md:text-4xl">{scores[team]}</span>
-                <div className="flex flex-col gap-1">
-                  <button
-                    onClick={() => handleAward(team, 1)}
-                    className="h-5 w-5 rounded-md bg-sky-50 text-xs font-black leading-none text-sky-600 hover:bg-sky-100"
-                    aria-label={`Add a point for ${teamNames[team]}`}
-                    title="Add a point"
-                  >
-                    +
-                  </button>
-                  <button
-                    onClick={() => handleAward(team, -1)}
-                    className="h-5 w-5 rounded-md bg-sky-50 text-xs font-black leading-none text-sky-600 hover:bg-sky-100"
-                    aria-label={`Remove a point from ${teamNames[team]}`}
-                    title="Remove a point"
-                  >
-                    −
-                  </button>
-                </div>
+                {showScores && (
+                  <>
+                    <span className="ok-heading-3d text-3xl tabular-nums md:text-4xl">{scores[team]}</span>
+                    <div className="flex flex-col gap-1">
+                      <button
+                        onClick={() => handleAward(team, 1)}
+                        className="h-5 w-5 rounded-md bg-sky-50 text-xs font-black leading-none text-sky-600 hover:bg-sky-100"
+                        aria-label={`Add a point for ${teamNames[team]}`}
+                        title="Add a point"
+                      >
+                        +
+                      </button>
+                      <button
+                        onClick={() => handleAward(team, -1)}
+                        className="h-5 w-5 rounded-md bg-sky-50 text-xs font-black leading-none text-sky-600 hover:bg-sky-100"
+                        aria-label={`Remove a point from ${teamNames[team]}`}
+                        title="Remove a point"
+                      >
+                        −
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             );
           })}
