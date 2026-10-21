@@ -33,3 +33,10 @@ export function isMuted(): boolean {
   return false;
 }
 
+
+// Apply a new volume to everything already playing (music beds, long clips)
+export function setPlayingVolume(volume: number) {
+  playingAudio.forEach((audio) => {
+    audio.volume = volume;
+  });
+}

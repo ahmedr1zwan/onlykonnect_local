@@ -33,6 +33,9 @@ export function GameIntro({ onComplete, sfxVolume }: GameIntroProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<number | null>(null);
   const fadeTimerRef = useRef<number | null>(null);
+  // Read through a ref so a volume change doesn't restart the intro music
+  const volumeRef = useRef(sfxVolume);
+  volumeRef.current = sfxVolume;
   const hasCompletedRef = useRef(false);
 
   const completeIntro = useCallback(() => {
@@ -65,7 +68,7 @@ export function GameIntro({ onComplete, sfxVolume }: GameIntroProps) {
 
     if (!isMuted()) {
       const audio = new Audio("/sounds/openingTitlesWithFlurry.mp3");
-      audio.volume = sfxVolume;
+      audio.volume = volumeRef.current;
       audioRef.current = audio;
       registerAudio(audio);
 
@@ -77,7 +80,7 @@ export function GameIntro({ onComplete, sfxVolume }: GameIntroProps) {
       const fadeOut = () => {
         if (audioRef.current !== audio) return;
         const progress = (performance.now() - fadeStart) / AUDIO_FADE_MS;
-        if (progress >= 0) audio.volume = sfxVolume * Math.max(0, 1 - progress);
+        if (progress >= 0) audio.volume = volumeRef.current * Math.max(0, 1 - progress);
         if (progress < 1) fadeTimerRef.current = window.setTimeout(fadeOut, 50);
       };
       fadeTimerRef.current = window.setTimeout(fadeOut, INTRO_DURATION_MS - AUDIO_FADE_MS);
@@ -101,7 +104,7 @@ export function GameIntro({ onComplete, sfxVolume }: GameIntroProps) {
         audioRef.current = null;
       }
     };
-  }, [completeIntro, sfxVolume]);
+  }, [completeIntro]);
 
   return (
     <div

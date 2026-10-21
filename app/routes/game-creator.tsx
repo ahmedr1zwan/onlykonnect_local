@@ -455,7 +455,7 @@ export default function GameCreator() {
             </div>
             <div>
               <label className="ok-label">
-                Steal Time: {timerSettings.defaultStealTime >= 60
+                Steal Time (other team): {timerSettings.defaultStealTime >= 60
                   ? `${Math.floor(timerSettings.defaultStealTime / 60)}:${String(timerSettings.defaultStealTime % 60).padStart(2, '0')}`
                   : `${timerSettings.defaultStealTime}s`}
               </label>

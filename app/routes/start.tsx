@@ -38,10 +38,13 @@ const TEAM_NAMES_KEY = "onlyconnect_team_names";
 const SFX_VOLUME_KEY = "onlyconnect_sfx_volume";
 const STARTING_TEAMS_KEY = "onlyconnect_starting_teams";
 
+type Scores = Record<Team, number>;
+
 interface GameState {
   currentRound: Round;
   currentTeam: Team;
   selectedTiles: SelectedTile[];
+  scores?: Scores;
 }
 
 interface TeamNames {
@@ -60,6 +63,7 @@ export default function Start() {
   const [currentRound, setCurrentRound] = useState<Round>(1);
   const [currentTeam, setCurrentTeam] = useState<Team>("team1");
   const [selectedTiles, setSelectedTiles] = useState<SelectedTile[]>([]);
+  const [scores, setScores] = useState<Scores>({ team1: 0, team2: 0 });
   const [revealingTileId, setRevealingTileId] = useState<number | null>(null);
   const [showReveal, setShowReveal] = useState(false);
   const [puzzles, setPuzzles] = useState<Record<number, PuzzleData>>({});
@@ -94,6 +98,7 @@ export default function Start() {
       setCurrentRound(gameState.currentRound);
       setCurrentTeam(gameState.currentTeam);
       setSelectedTiles(gameState.selectedTiles);
+      setScores(gameState.scores ?? { team1: 0, team2: 0 });
     } else {
       // Use configured starting team for Round 1 if no saved game
       const storedTeams = localStorage.getItem(STARTING_TEAMS_KEY);
@@ -113,10 +118,15 @@ export default function Start() {
         currentRound,
         currentTeam,
         selectedTiles,
+        scores,
       };
       localStorage.setItem(GAME_STATE_KEY, JSON.stringify(gameState));
     }
-  }, [currentRound, currentTeam, selectedTiles, isInitialLoad]);
+  }, [currentRound, currentTeam, selectedTiles, scores, isInitialLoad]);
+
+  const handleAward = (team: Team, points: number) => {
+    setScores(prev => ({ ...prev, [team]: Math.max(0, prev[team] + points) }));
+  };
 
   const handleTileClick = (tileId: number, symbol: string) => {
     // Check if tile already selected in current round
@@ -179,6 +189,7 @@ export default function Start() {
     const storedTeams = localStorage.getItem(STARTING_TEAMS_KEY);
     setCurrentTeam(storedTeams ? JSON.parse(storedTeams).round1 : "team1");
     setSelectedTiles([]);
+    setScores({ team1: 0, team2: 0 });
     localStorage.removeItem(GAME_STATE_KEY);
   };
 
@@ -216,13 +227,9 @@ export default function Start() {
     <div className="ok-page h-screen flex flex-col items-center justify-center p-4 overflow-hidden">
       <div className="max-w-6xl w-full h-full flex flex-col">
         {/* Top bar: back link + host status (left clear for the global sound controls) */}
-        <div className="flex-shrink-0 flex flex-wrap items-center justify-end gap-3 pl-28">
+        <div className="flex-shrink-0 flex flex-wrap items-center justify-end gap-3 pl-56">
           <div className="ok-panel flex items-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-wider text-slate-600 sm:gap-4">
             <span className="text-sky-600">Round {currentRound}</span>
-            <span className="h-4 w-px bg-sky-200" />
-            <span>
-              Team {teamNames[currentTeam] || (currentTeam === "team1" ? "1" : "2")}'s turn
-            </span>
             <span className="h-4 w-px bg-sky-200" />
             <span>{6 - tilesSelectedThisRound}/6 left</span>
             {currentRound === 1 && tilesSelectedThisRound === 6 && (
@@ -258,7 +265,45 @@ export default function Start() {
           <h1 className="ok-title-3d mt-2 text-2xl md:text-4xl lg:text-5xl">
             {currentRound === 1 ? "Connections" : "Sequences"}
           </h1>
-          <div className="ok-rule mx-auto mt-4 w-72 max-w-[70vw]" />
+        </div>
+
+        {/* Scoreboard: the team to play glows; small +/- for host corrections */}
+        <div className="flex-shrink-0 mt-5 flex items-stretch justify-center gap-4 md:gap-8">
+          {(["team1", "team2"] as Team[]).map((team) => {
+            const isTurn = currentTeam === team;
+            return (
+              <div
+                key={team}
+                className={`ok-panel flex min-w-[10rem] items-center gap-4 px-4 py-2 transition ${isTurn ? "ring-4 ring-sky-300" : "opacity-80"}`}
+              >
+                <div className="flex-1">
+                  <p className="ok-label mb-0">{isTurn ? "To play" : "Team"}</p>
+                  <p className="text-base font-black text-slate-800 md:text-lg">
+                    {teamNames[team] || (team === "team1" ? "1" : "2")}
+                  </p>
+                </div>
+                <span className="ok-heading-3d text-3xl tabular-nums md:text-4xl">{scores[team]}</span>
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={() => handleAward(team, 1)}
+                    className="h-5 w-5 rounded-md bg-sky-50 text-xs font-black leading-none text-sky-600 hover:bg-sky-100"
+                    aria-label={`Add a point for ${teamNames[team]}`}
+                    title="Add a point"
+                  >
+                    +
+                  </button>
+                  <button
+                    onClick={() => handleAward(team, -1)}
+                    className="h-5 w-5 rounded-md bg-sky-50 text-xs font-black leading-none text-sky-600 hover:bg-sky-100"
+                    aria-label={`Remove a point from ${teamNames[team]}`}
+                    title="Remove a point"
+                  >
+                    −
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Tile Grid - Takes remaining space */}
@@ -298,6 +343,7 @@ export default function Start() {
               tileId={revealingTileId}
               round={currentRound}
               onClose={handleRevealClose}
+              onAward={handleAward}
               currentTeam={currentTeam}
               teamNames={teamNames}
               hints={hints}
