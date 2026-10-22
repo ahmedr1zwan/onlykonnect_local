@@ -5,6 +5,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
 } from "react-router";
 
 import type { Route } from "./+types/root";
@@ -44,8 +45,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Small version tag in the corner; kept off the game board so it never sits over play
+function VersionLabel() {
+  const { pathname } = useLocation();
+  if (pathname.startsWith("/start")) return null;
+  return (
+    <p className="pointer-events-none fixed bottom-2 right-3 z-10 text-[0.65rem] font-semibold tracking-wider text-slate-400">
+      OnlyKonnect v{__APP_VERSION__}
+    </p>
+  );
+}
+
 export default function App() {
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <VersionLabel />
+    </>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
