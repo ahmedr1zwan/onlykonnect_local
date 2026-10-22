@@ -233,8 +233,8 @@ export default function Start() {
   const tilesSelectedThisRound = currentRoundTiles.length;
 
   return (
-    <div className="ok-page h-screen flex flex-col items-center justify-center p-4 overflow-hidden">
-      <div className="max-w-6xl w-full h-full flex flex-col">
+    <div className="ok-page h-dvh flex flex-col items-center justify-center p-4 overflow-hidden">
+      <div className="max-w-[104rem] w-full h-full flex flex-col">
         {/* Top bar: back link + host status (left clear for the global sound controls) */}
         <div className="flex-shrink-0 flex flex-wrap items-center justify-end gap-3 pl-56">
           <div className="ok-panel flex items-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-wider text-slate-600 sm:gap-4">
@@ -268,16 +268,16 @@ export default function Start() {
           </Link>
         </div>
 
-        {/* Game Title */}
-        <div className="flex-shrink-0 text-center mt-6">
+        {/* Game Title: spacing and size follow the viewport height so short laptop screens keep room for the tiles */}
+        <div className="flex-shrink-0 text-center mt-[clamp(0.25rem,2vh,1.5rem)]">
           <p className="ok-kicker">Round {currentRound}</p>
-          <h1 className="ok-title-3d mt-2 text-2xl md:text-4xl lg:text-5xl">
+          <h1 className="ok-title-3d mt-1 text-[clamp(1.5rem,min(6vw,5.5vh),4rem)] leading-tight">
             {currentRound === 1 ? "Connections" : "Sequences"}
           </h1>
         </div>
 
         {/* Scoreboard: the team to play glows; small +/- for host corrections */}
-        <div className="flex-shrink-0 mt-5 flex items-stretch justify-center gap-4 md:gap-8">
+        <div className="flex-shrink-0 mt-[clamp(0.5rem,2.2vh,1.25rem)] flex items-stretch justify-center gap-4 md:gap-8">
           {(["team1", "team2"] as Team[]).map((team) => {
             const isTurn = currentTeam === team;
             return (
@@ -326,8 +326,8 @@ export default function Start() {
           })}
         </div>
 
-        {/* Tile Grid - Takes remaining space */}
-        <div className="flex-1 flex items-center justify-center min-h-0 mb-2">
+        {/* Tile Grid - takes the remaining height; padding keeps clear of the card ring and tile shadows */}
+        <div className="ok-board flex-1 min-h-0 flex items-center justify-center pt-[clamp(1rem,3.5vh,2.5rem)] pb-[clamp(0.75rem,2.5vh,2rem)]">
           <TileGrid
             onTileClick={handleTileClick}
             selectedTileIds={currentRoundTiles.map(t => t.id)}

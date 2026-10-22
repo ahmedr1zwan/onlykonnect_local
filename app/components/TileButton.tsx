@@ -24,7 +24,7 @@ export function TileButton({
 
   return (
     <button
-      className={`ok-tile aspect-[5/4] group
+      className={`ok-tile @container aspect-[5/4] group
         ${isSelected || disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
       `}
       onMouseMove={(e) => {
@@ -70,13 +70,13 @@ export function TileButton({
       <div className="absolute inset-[6%] rounded-xl border border-sky-200/70 pointer-events-none" />
 
       <div className="relative h-full flex items-center justify-center">
-        <Icon className={`w-28 h-28 md:w-36 md:h-36 lg:w-40 lg:h-40 drop-shadow-[0_3px_4px_rgba(14,165,233,0.35)] transition-transform duration-300 ${
+        <Icon className={`w-[44cqw] h-[44cqw] drop-shadow-[0_3px_4px_rgba(14,165,233,0.35)] transition-transform duration-300 ${
           isHovered && !disabled && !isSelected ? 'scale-110' : 'scale-100'
         }`} />
       </div>
       
-      <div className="absolute bottom-4 left-0 right-0 text-center">
-        <span className="text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-sky-700/70">
+      <div className="absolute bottom-[5cqw] left-0 right-0 text-center">
+        <span className="text-[clamp(0.625rem,4cqw,0.875rem)] font-bold uppercase tracking-[0.2em] text-sky-700/70">
           {symbol}
         </span>
       </div>

@@ -311,6 +311,36 @@
       0 10px 18px rgba(14, 116, 182, 0.2);
   }
 
+  /* Game board: the grid gets whatever height is left under the header and
+   * sizes its tiles to fit both ways, so it never spills over the team cards
+   * or the caption. cqh/cqw are relative to .ok-board's content box. */
+  .ok-board {
+    container-type: size;
+  }
+
+  .ok-board-grid {
+    --cols: 2;
+    --rows: 3;
+    --gap: clamp(1.25rem, 5cqh, 3rem);
+    --edge: 14px; /* tile slab under each row + hover lift */
+    display: grid;
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+    gap: var(--gap);
+    /* Tiles are 5:4, so a height-limited tile is 1.25x as wide as it is tall */
+    width: min(
+      100%,
+      calc((100cqh - (var(--rows) - 1) * var(--gap) - var(--edge)) / var(--rows) * 1.25 * var(--cols)
+        + (var(--cols) - 1) * var(--gap))
+    );
+  }
+
+  @media (min-width: 48rem) {
+    .ok-board-grid {
+      --cols: 3;
+      --rows: 2;
+    }
+  }
+
   /* Moving glare that follows the tilt */
   .ok-tile-glare {
     position: absolute;
