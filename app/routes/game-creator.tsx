@@ -3,6 +3,15 @@ import type { Route } from "./+types/game-creator";
 import { Link } from "react-router";
 import { DEFAULT_POINTS, loadPointsSettings, savePointsSettings, type PointsSettings } from "../utils/pointsSettings";
 import { TwoReeds, Lion, TwistedFlax, HornedViper, Water, EyeOfHorus } from "../components/Hieroglyphs";
+import { LineupEditor } from "../components/LineupEditor";
+import {
+  DEFAULT_LINEUP,
+  loadLineup,
+  loadTeamIntroEnabled,
+  saveLineup,
+  saveTeamIntroEnabled,
+  type Lineup,
+} from "../utils/lineup";
 
 const tileMap: Record<number, {
   symbol: string;
@@ -87,6 +96,8 @@ export default function GameCreator() {
     return false;
   });
   const [pointsSettings, setPointsSettings] = useState<PointsSettings>(DEFAULT_POINTS);
+  const [lineup, setLineup] = useState<Lineup>(DEFAULT_LINEUP);
+  const [teamIntro, setTeamIntro] = useState(true);
   // Score totals are hidden on the game board unless the host opts in
   const [showScores, setShowScores] = useState(() => {
     if (typeof window !== "undefined") {
@@ -97,6 +108,8 @@ export default function GameCreator() {
 
   useEffect(() => {
     setPointsSettings(loadPointsSettings());
+    setLineup(loadLineup());
+    setTeamIntro(loadTeamIntroEnabled());
 
     // Load team names from localStorage
     const storedTeamNames = localStorage.getItem(TEAM_NAMES_KEY);
@@ -243,6 +256,16 @@ export default function GameCreator() {
   const handleShowScoresChange = (enabled: boolean) => {
     setShowScores(enabled);
     localStorage.setItem(SHOW_SCORES_KEY, enabled.toString());
+  };
+
+  const handleLineupChange = (updated: Lineup) => {
+    setLineup(updated);
+    saveLineup(updated);
+  };
+
+  const handleTeamIntroChange = (enabled: boolean) => {
+    setTeamIntro(enabled);
+    saveTeamIntroEnabled(enabled);
   };
 
   const handleSkipIntroChange = (enabled: boolean) => {
@@ -443,28 +466,7 @@ export default function GameCreator() {
 
         {/* Compact Settings Bar */}
         <div className="ok-panel mb-8 p-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-            {/* Team Names - Compact */}
-            <div>
-              <label className="ok-label">Team 1</label>
-              <input
-                type="text"
-                value={teamNames.team1}
-                onChange={(e) => handleTeamNameChange("team1", e.target.value)}
-                className="ok-input py-1.5 text-sm"
-                placeholder="Team 1"
-              />
-            </div>
-            <div>
-              <label className="ok-label">Team 2</label>
-              <input
-                type="text"
-                value={teamNames.team2}
-                onChange={(e) => handleTeamNameChange("team2", e.target.value)}
-                className="ok-input py-1.5 text-sm"
-                placeholder="Team 2"
-              />
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
             {/* Timer Settings - Compact */}
             <div>
               <label className="ok-label">
@@ -534,6 +536,18 @@ export default function GameCreator() {
               </label>
             </div>
             <div>
+              <span className="ok-label">Line-up</span>
+              <label className="ok-input flex h-[34px] items-center gap-2 py-0 text-sm">
+                <input
+                  type="checkbox"
+                  checked={teamIntro}
+                  onChange={(e) => handleTeamIntroChange(e.target.checked)}
+                  className="h-4 w-4 accent-sky-500"
+                />
+                <span>Team intros</span>
+              </label>
+            </div>
+            <div>
               <span className="ok-label">Scores</span>
               <label className="ok-input flex h-[34px] items-center gap-2 py-0 text-sm">
                 <input
@@ -588,6 +602,13 @@ export default function GameCreator() {
             </button>
           </div>
         </div>
+
+        <LineupEditor
+          lineup={lineup}
+          teamNames={teamNames}
+          onLineupChange={handleLineupChange}
+          onTeamNameChange={handleTeamNameChange}
+        />
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           {/* Tile Selection */}

@@ -4,6 +4,8 @@ import { Link } from "react-router";
 import { TileGrid } from "../components/TileGrid";
 import { TileReveal } from "../components/TileReveal";
 import { ReadyPopup } from "../components/ReadyPopup";
+import { Avatar } from "../components/Avatar";
+import { DEFAULT_LINEUP, loadLineup, type Lineup } from "../utils/lineup";
 
 type Round = 1 | 2;
 type Team = "team1" | "team2";
@@ -67,6 +69,7 @@ export default function Start() {
   const [scores, setScores] = useState<Scores>({ team1: 0, team2: 0 });
   // Totals are still tracked when hidden, so turning the tally on mid-game shows real scores
   const [showScores, setShowScores] = useState(false);
+  const [lineup, setLineup] = useState<Lineup>(DEFAULT_LINEUP);
   const [revealingTileId, setRevealingTileId] = useState<number | null>(null);
   const [showReveal, setShowReveal] = useState(false);
   const [puzzles, setPuzzles] = useState<Record<number, PuzzleData>>({});
@@ -89,6 +92,7 @@ export default function Start() {
     }
 
     setShowScores(localStorage.getItem(SHOW_SCORES_KEY) === "true");
+    setLineup(loadLineup());
 
     // Load team names from localStorage
     const storedTeamNames = localStorage.getItem(TEAM_NAMES_KEY);
@@ -281,6 +285,13 @@ export default function Start() {
                 key={team}
                 className={`ok-panel flex min-w-[10rem] items-center gap-4 px-4 py-2 transition ${isTurn ? "ring-4 ring-sky-300" : "opacity-80"}`}
               >
+                <div className="flex -space-x-3">
+                  {lineup[team].map((player, i) => (
+                    <div key={i} className="ok-avatar-disc h-10 w-10 md:h-11 md:w-11" style={{ zIndex: lineup[team].length - i }}>
+                      <Avatar config={player.avatar} crop="head" className="h-full w-full" title={player.name} />
+                    </div>
+                  ))}
+                </div>
                 <div className="flex-1">
                   <p className="ok-label mb-0">{isTurn ? "To play" : "Team"}</p>
                   <p className="text-base font-black text-slate-800 md:text-lg">

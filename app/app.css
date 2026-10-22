@@ -383,6 +383,42 @@
     -webkit-backdrop-filter: blur(6px);
   }
 
+  /* Round glossy frame avatars sit in */
+  .ok-avatar-disc {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid #ffffff;
+    border-radius: 9999px;
+    background:
+      radial-gradient(circle at 30% 20%, #ffffff 0%, transparent 55%),
+      linear-gradient(180deg, #e0f2fe 0%, #bae6fd 100%);
+    box-shadow:
+      inset 0 -6px 12px rgba(14, 116, 182, 0.15),
+      0 4px 0 #a5d4f5,
+      0 10px 18px rgba(14, 116, 182, 0.18);
+  }
+
+  /* Team introduction cards */
+  .ok-lineup-title {
+    animation: ok-lineup-title 600ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  }
+
+  .ok-lineup-member {
+    perspective: 900px;
+  }
+
+  .ok-lineup-member > * {
+    animation: ok-lineup-in 700ms cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+    animation-delay: calc(350ms + var(--i, 0) * 220ms);
+  }
+
+  .ok-lineup-plate {
+    animation: ok-lineup-plate 450ms ease-out both;
+    animation-delay: calc(650ms + var(--i, 0) * 220ms);
+  }
+
   /* Slow tilted fractal disc used as a background ornament */
   .ok-disc {
     transform: perspective(900px) rotateX(64deg);
@@ -393,11 +429,32 @@
   }
 }
 
+@keyframes ok-lineup-title {
+  from { opacity: 0; transform: translateY(-16px) scale(0.92); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes ok-lineup-in {
+  from { opacity: 0; transform: translateY(60px) rotateY(-75deg) scale(0.8); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes ok-lineup-plate {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ok-tile,
   .ok-btn,
   .ok-flip-inner {
     transition: none;
+  }
+
+  .ok-lineup-title,
+  .ok-lineup-member > *,
+  .ok-lineup-plate {
+    animation: none;
   }
 
   .ok-disc > * {

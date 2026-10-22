@@ -3,10 +3,13 @@ import type { Route } from "./+types/home";
 import { Link, useNavigate } from "react-router";
 import { OnlyConnectFractal } from "../components/OnlyConnectFractal";
 import { GameIntro } from "../components/GameIntro";
+import { TeamIntro } from "../components/TeamIntro";
+import { loadLineup, loadTeamIntroEnabled, type Lineup } from "../utils/lineup";
 
 const GAME_STATE_KEY = "onlyconnect_game_state";
 const SFX_VOLUME_KEY = "onlyconnect_sfx_volume";
 const SKIP_INTRO_KEY = "onlyconnect_skip_intro";
+const TEAM_NAMES_KEY = "onlyconnect_team_names";
 
 interface GameState {
   currentRound: 1 | 2;
@@ -39,7 +42,10 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Home() {
   const [hasGameInProgress, setHasGameInProgress] = useState(false);
-  const [showIntro, setShowIntro] = useState(false);
+  // New game: opening titles, then host/team introductions, then the board
+  const [stage, setStage] = useState<"menu" | "titles" | "teams">("menu");
+  const [lineup, setLineup] = useState<Lineup | null>(null);
+  const [teamNames, setTeamNames] = useState({ team1: "Team 1", team2: "Team 2" });
   const [sfxVolume, setSfxVolume] = useState(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(SFX_VOLUME_KEY);
@@ -94,12 +100,29 @@ export default function Home() {
     // Clear game state
     localStorage.removeItem(GAME_STATE_KEY);
 
-    if (localStorage.getItem(SKIP_INTRO_KEY) === "true") {
-      navigate("/start");
-      return;
+    setLineup(loadLineup());
+    try {
+      const stored = localStorage.getItem(TEAM_NAMES_KEY);
+      if (stored) setTeamNames((prev) => ({ ...prev, ...JSON.parse(stored) }));
+    } catch {
+      // Keep the default names
     }
 
-    setShowIntro(true);
+    if (localStorage.getItem(SKIP_INTRO_KEY) !== "true") {
+      setStage("titles");
+    } else if (loadTeamIntroEnabled()) {
+      setStage("teams");
+    } else {
+      navigate("/start");
+    }
+  };
+
+  const handleTitlesComplete = () => {
+    if (loadTeamIntroEnabled()) {
+      setStage("teams");
+    } else {
+      handleStartGame();
+    }
   };
 
   const handleResumeGame = () => {
@@ -109,7 +132,7 @@ export default function Home() {
 
   const handleStartGame = () => {
     navigate("/start");
-    setShowIntro(false);
+    setStage("menu");
   };
 
   return (
@@ -157,8 +180,11 @@ export default function Home() {
         </nav>
       </div>
     </main>
-    {showIntro && (
-      <GameIntro onComplete={handleStartGame} sfxVolume={sfxVolume} />
+    {stage === "titles" && (
+      <GameIntro onComplete={handleTitlesComplete} sfxVolume={sfxVolume} />
+    )}
+    {stage === "teams" && lineup && (
+      <TeamIntro lineup={lineup} teamNames={teamNames} sfxVolume={sfxVolume} onComplete={handleStartGame} />
     )}
   </>
 );

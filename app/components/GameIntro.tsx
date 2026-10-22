@@ -36,6 +36,9 @@ export function GameIntro({ onComplete, sfxVolume }: GameIntroProps) {
   // Read through a ref so a volume change doesn't restart the intro music
   const volumeRef = useRef(sfxVolume);
   volumeRef.current = sfxVolume;
+  // Same for the callback: a new function from the parent mustn't restart the intro
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
   const hasCompletedRef = useRef(false);
 
   const completeIntro = useCallback(() => {
@@ -60,8 +63,8 @@ export function GameIntro({ onComplete, sfxVolume }: GameIntroProps) {
       audioRef.current = null;
     }
 
-    onComplete();
-  }, [onComplete]);
+    onCompleteRef.current();
+  }, []);
 
   useEffect(() => {
     timerRef.current = window.setTimeout(completeIntro, INTRO_DURATION_MS);
